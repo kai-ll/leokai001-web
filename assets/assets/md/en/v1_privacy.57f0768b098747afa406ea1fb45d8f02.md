@@ -51,7 +51,7 @@ Data subjects may exercise their rights to request access, correction, deletion,
 The Company designates a Personal Information Protection Officer as follows to take overall responsibility for personal information processing and to handle complaints and remedy damages related to personal information processing:
 
 - **Personal Information Protection Officer**: Representative of JKAI LLC
-- **Contact**: privacy@jkai.com
+- **Contact**: contact@jkai.app
 
 ---
 
