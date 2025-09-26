@@ -1,6 +1,6 @@
-# Frequently Asked Questions
+# StepPot Frequently Asked Questions (FAQ)
 
-StepPot is a free reward app where you can complete missions such as walking or watching ads to collect tickets and join the Mega Lotto 6/45 draw held every Wednesday at 9:00 PM (GMT+8). Winners are determined based on the official lottery results.
+StepPot is a free reward app where you can complete missions such as walking or watching ads to collect tickets and join the **Mega Lotto 6/45** draw held every Wednesday at 9:00 PM (GMT+8). Winners are determined based on the official lottery results.
 
 ## 1. Service & Tickets
 **Q. Is StepPot a paid service?**  
@@ -20,7 +20,8 @@ A. You can either choose the numbers yourself or use the auto-generated suggesti
 
 ## 2. Draw & Winning
 **Q. When is the draw held?**  
-A. The draw takes place every Wednesday at 9:00 PM, based on the official Mega Lotto 6/45 results. → Numbers drawn on Monday and Friday are not used.
+A. The draw takes place every Wednesday at 9:00 PM, based on the official Mega Lotto 6/45 results. 
+**Numbers drawn on Monday and Friday are not used.**
 
 **Q. What is the entry period?**  
 A. Entries are open from Thursday 12:00 PM until Wednesday 8:00 PM (GMT+8).
