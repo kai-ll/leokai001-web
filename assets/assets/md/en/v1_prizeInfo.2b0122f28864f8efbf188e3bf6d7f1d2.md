@@ -1,4 +1,4 @@
-# Entry, Draw & Prize Guide (EN)
+# Entry, Draw & Prize Guide
 
 ## Entry Method
 * Complete daily missions to receive lottery tickets.  

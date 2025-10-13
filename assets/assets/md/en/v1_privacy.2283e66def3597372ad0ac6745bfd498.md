@@ -94,7 +94,7 @@ Reasonable additional information may be requested to verify identity. Authorize
 Requests will be processed without delay. If full or partial restrictions apply (e.g., to protect other users’ rights or due to retention obligations), the reason will be provided.
 
 4. Account Deletion
-Withdrawal may be requested in [Settings] > [Account] > [Delete Account]. Upon withdrawal, personal data will be destroyed without delay, except for data required by law to be retained.
+Withdrawal may be requested in [Settings] > [Account] > [My Information] > [Delete Account]. Upon withdrawal, personal data will be destroyed without delay, except for data required by law to be retained.
 
 5. Marketing/Advertising Settings
 Consent for personalized ads or marketing may be changed at any time in app settings. If consent is refused or withdrawn, only non-personalized (contextual) ads may be shown. Device settings also allow resetting advertising IDs or limiting tracking.

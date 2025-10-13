@@ -1,4 +1,5 @@
-# StepPot Frequently Asked Questions (FAQ)
+# FAQ
+## StepPot Frequently Asked Questions
 
 StepPot is a free reward app where you can complete missions such as walking or watching ads to collect tickets and join the **Mega Lotto 6/45** draw held every Wednesday at 9:00 PM (GMT+8). Winners are determined based on the official lottery results.
 
