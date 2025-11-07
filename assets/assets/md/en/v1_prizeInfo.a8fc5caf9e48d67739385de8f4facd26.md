@@ -1,8 +1,8 @@
 # Entry, Draw & Prize Guide
 
 ## Entry Method
-* Complete daily missions to receive lottery tickets.  
-* Entries are available from Thursday 12:00 PM to Wednesday 8:00 PM (PHT, GMT+8).  
+* Complete daily missions to receive lottery tickets.
+* Entries open again after the results are announced. You can participate in the next draw once the previous results have been released
 * Select 6 numbers from 1 to 45 to enter.
 
 ## Draw Method
@@ -22,5 +22,5 @@
 * Prizes are divided equally among winners.  
 * Winning results will be shown in the app after Thursday 12:00 PM.  
 * Please complete the winner information entry and prize claim before the next round’s entry deadline.  
-* 1st place winners are required to provide: Name (First, Middle, Last), phone number, address, email, and GCash wallet number.  
+* 1st place winners are required to provide: Name (First, Middle, Last), phone number, address, email, and bank account number.  
 * Prizes will be deposited within 10 business days after information is submitted.

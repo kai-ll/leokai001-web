@@ -35,7 +35,7 @@ A. The prize will be divided equally. (e.g., If the prize is ₱40,000 and there
 
 ## 3. Prize & Taxes
 **Q. How do I receive my prize?**  
-A. Prizes are paid to your GCash account and are available for use immediately. The required details for payout will be requested via email to the winners.
+A. Prizes are given in cash, and winners will receive an e-mail with instructions on how to claim them.
 
 **Q. When will the prize be paid?**  
 A. Within 10 days after the official announcement of results.
