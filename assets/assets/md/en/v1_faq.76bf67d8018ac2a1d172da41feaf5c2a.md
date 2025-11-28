@@ -1,7 +1,9 @@
 # FAQ
 ## StepPot Frequently Asked Questions
-
-StepPot is a free reward app where you can complete missions such as walking or watching ads to collect entries and join the **Mega Lotto 6/45** event held every Wednesday at 9:00 PM (GMT+8). Winners are determined based on the official results.
+* StepPot is a free reward app where you can complete missions such as walking or watching ads to collect entries.
+* No purchase or payment is ever required.
+* StepPot’s weekly event uses the publicly announced Mega Lotto 6/45 results to determine matching conditions.
+* StepPot is not affiliated with any lottery operator.
 
 ## 1. Service & Tickets
 **Q. Is StepPot a paid service?**  
@@ -21,8 +23,8 @@ A. You can either choose the numbers yourself or use the auto-generated suggesti
 
 ## 2. Event & Winning
 **Q. When is the event held?**  
-A. Every Wednesday at 9:00 PM, we reference the official Mega Lotto 6/45 results to determine the winners.
-**Numbers drawn on Monday and Friday are not used.**
+A. Every Wednesday at 9:00 PM (GMT+8). The results are based on publicly announced Mega Lotto 6/45 numbers.  
+**Monday and Friday Mega Lotto 6/45 results are not used.**
 
 **Q. What is the entry period?**  
 A. Entries are open from Thursday 12:00 PM until Wednesday 8:00 PM (GMT+8).
@@ -31,9 +33,9 @@ A. Entries are open from Thursday 12:00 PM until Wednesday 8:00 PM (GMT+8).
 A. You can check the winning results on the home screen or in the Results tab.
 
 **Q. What happens if there are multiple first-place winners?**  
-A. The reward will be divided equally. (e.g., If the reward is ₱40,000 and there are 2 winners, each will receive ₱20,000.)
+A. The reward will be divided equally. (e.g., If the reward amount is ₱40,000 and there are 2 winners, each will receive ₱20,000.)
 
-## 3. Prize & Taxes
+## 3. Reward & Taxes
 **Q. How do I receive my reward?**  
 A. Rewards are provided digitally (e.g., GCash/PayPal). Winners will receive an e-mail with instructions on how to claim them.
 No purchase is ever required to claim rewards.
