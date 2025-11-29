@@ -42,8 +42,8 @@
 ### Entry Period
 * Entries are accepted from Thursday 12:00 PM to Wednesday 8:00 PM (GMT+8).
 ### Determining Winners
-* Winners are determined based entirely on whether the user’s self-selected numbers match the official public 6-number results announced every Wednesday at 9:00 PM (GMT+8).
-* The app does not generate results, does not randomize outcomes, and performs no drawing of any kind.
+* Winners are determined based entirely on whether the user’s self-selected numbers match the official publicly available weekly results announced every Wednesday at 9:00 PM (GMT+8).
+* The app does not generate results, does not randomize outcomes, and performs no random selection of winners.
 * Matching is strictly deterministic based on user-selected numbers and publicly available results.
 ### Rewards
 * Rewards are provided digitally (e.g., GCash or PayPal).  
