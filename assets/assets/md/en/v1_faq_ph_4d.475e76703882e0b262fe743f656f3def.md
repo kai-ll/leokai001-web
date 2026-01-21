@@ -12,10 +12,10 @@ A. No, StepPot is completely free to use for everyone.
 **Q. How can I get entries?**  
 A. You can earn entries by completing various missions, such as reaching step goals or watching ads.
 
-**Q. How long are entries valid? **  
+**Q. How long are entries valid?**  
 A. Entries do not expire and can be used in any event before the deadline for that round.
 
-**Q. How many times can I enter per day? **  
+**Q. How many times can I enter per day?**  
 A. As long as you have entries, you can submit free entries without any limit.
 
 **Q. Are numbers generated automatically?**  
@@ -28,20 +28,20 @@ A. Draws are held every Monday, Wednesday, and Friday at 9:00 PM (GMT+8), based 
 **Q. What is the entry period?**  
 A. Entries close 1 hour before the official draw time. New entries open again once the draw results have been confirmed and updated in the app.
 
-**Q. Where can I check the results? **  
+**Q. Where can I check the results?**  
 A. You can check the winning results on the home screen or in the Results tab.
 
 ## 3. Reward & Taxes
 **Q. How do I receive my reward?**  
 A. Rewards are provided digitally (e.g., GCash/PayPal). Winners will receive an e-mail with instructions on how to claim them. No purchase is ever required to claim rewards.
 
-**Q. What happens if there are multiple first-place winners? **  
+**Q. What happens if there are multiple first-place winners?**  
 A. The reward will be divided equally. (e.g., If the reward amount is ₱100 and there are 2 winners, each will receive ₱50)
 
-**Q. When will the reward be paid? **  
+**Q. When will the reward be paid?**  
 A. Within 10 days after the official results are announced.
 
-**Q. Who is responsible for taxes? **  
+**Q. Who is responsible for taxes?**  
 A. Depending on your country, local tax regulations may apply. Winners are responsible for any applicable taxes.
 
 ## 4. Troubleshooting
