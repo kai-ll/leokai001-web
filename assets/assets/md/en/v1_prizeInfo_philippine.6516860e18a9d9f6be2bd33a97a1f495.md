@@ -2,7 +2,7 @@
 
 ## Entry Method
 * Complete daily missions to receive entries.
-* Entries open again after the results are announced. You can participate in the next event round once the previous results have been released
+* Entries reopen once the previous event results have been confirmed and updated.
 * Select your 6 numbers (or use auto-pick) to submit a free entry.
 
 ## Event Method
@@ -12,7 +12,7 @@
 
 ## Reward Information
 * Rewards are provided based on how many of your selected numbers match the official public results.
-* All rewards are digital rewards funded by advertising revenue, and no purchase or payment is ever required.
+* All rewards are digital rewards. No purchase or payment is ever required.
 
 |**Tier** |**Match Condition**     |**Reward**                               |
 |:-------:|:----------------------:|:---------------------------------------:|
@@ -23,7 +23,7 @@
 
 ## Claim Method
 * Rewards are divided equally among winners.  
-* Winning results will be shown in the app after Thursday 12:00 PM.  
-* Please complete your winner information and reward claim before the next round’s entry deadline.  
-* 1st place winners are required to provide: Name (First, Middle, Last), phone number, address, email, and bank details  
+* Winning results will be shown in the app once the draw results have been confirmed and updated.
+* Please complete your winner information and reward claim before the next round’s entry deadline.
+* 1st place winners are required to provide: Name (First, Middle, Last), phone number, address, email, and payout details.
 * Rewards will be deposited within 10 business days after information is submitted.

@@ -27,24 +27,24 @@ A. Every Wednesday at 9:00 PM (GMT+8). The results are based on publicly announc
 **Monday and Friday Mega Lotto 6/45 results are not used.**
 
 **Q. What is the entry period?**  
-A. Entries are open from Thursday 12:00 PM until Wednesday 8:00 PM (GMT+8).
+A. Entries close 1 hour before the official draw time. New entries open again once the draw results have been confirmed and updated in the app.  
 
 **Q. Where can I check the results?**  
 A. You can check the winning results on the home screen or in the Results tab.
 
-**Q. What happens if there are multiple first-place winners?**  
-A. The reward will be divided equally. (e.g., If the reward amount is ₱40,000 and there are 2 winners, each will receive ₱20,000.)
-
 ## 3. Reward & Taxes
 **Q. How do I receive my reward?**  
-A. Rewards are provided digitally (e.g., GCash/PayPal). Winners will receive an e-mail with instructions on how to claim them.
+A. Rewards are provided digitally (e.g., GCash/PayPal). Winners will receive an e-mail with instructions on how to claim them.  
 No purchase is ever required to claim rewards.
 
+**Q. What happens if there are multiple first-place winners?**  
+A. The reward will be divided equally. (e.g., If the reward amount is ₱40,000 and there are 2 winners, each will receive ₱20,000.)  
+
 **Q. When will the reward be paid?**  
-A. Within 10 days after the official results are announced.
+A. Within 10 days after the official results are announced.  
 
 **Q. Who is responsible for taxes?**  
-A. Depending on your country, local tax regulations may apply.
+A. Depending on your country, local tax regulations may apply. Winners are responsible for any applicable taxes.  
 
 ## 4. Troubleshooting
 **Q. My steps are not being recorded. What should I do?**  
