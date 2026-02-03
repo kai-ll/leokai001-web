@@ -16,7 +16,7 @@
 
 |**Tier** |**Match Condition**     |**Reward**                               |
 |:-------:|:----------------------:|:---------------------------------------:|
-| 1st     | 6 numbers match        | Up to ₱40,000 equivalent digital reward |  
+| 1st     | 6 numbers match        | Top prize (see current amount in app)   |  
 | 2nd     | 5 numbers match        | 100 entries                             |
 | 3rd     | 4 numbers match        | 20 entries                              |
 | 4th     | 3 numbers match        | 5 entries                               |

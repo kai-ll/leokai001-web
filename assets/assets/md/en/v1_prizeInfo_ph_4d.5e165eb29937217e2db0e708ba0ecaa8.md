@@ -13,11 +13,11 @@
 * Rewards are provided based on how closely your selected 4-digit number matches the official public result, in exact order.
 * All rewards are digital rewards. No purchase or payment is ever required.
 
-|**Tier** |**Match Condition**                  |**Reward**                           |
-|:-------:|:-----------------------------------:|:-----------------------------------:|
-| 1st     |Exact 4-digit match (in exact order) | Up to ₱100 equivalent digital reward|
-| 2nd     |Last 3 digits match (in exact order) | 20 entries                          |
-| 3rd     |Last 2 digits match (in exact order) | 5 entries                           |
+|**Tier** |**Match Condition**                  |**Reward**                            |
+|:-------:|:-----------------------------------:|:------------------------------------:|
+| 1st     |Exact 4-digit match (in exact order) | Top prize (see current amount in app)|
+| 2nd     |Last 3 digits match (in exact order) | 20 entries                           |
+| 3rd     |Last 2 digits match (in exact order) | 5 entries                            |
 
 ## Claim Method
 * Rewards are divided equally among winners.
