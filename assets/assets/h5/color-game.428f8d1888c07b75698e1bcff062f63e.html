@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Color Game — StepPot</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#e8f5f0;--bg2:#f0faf6;--gold:#e8a800;--gold-d:#c89200;--green:#00c853;--red:#ff3d57;--cyan:#00bfa5;--text:#1a3a2f;--dim:#6b9b8a}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow:hidden;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.app{width:100%;max-width:420px;margin:0 auto;height:100vh;display:flex;flex-direction:column;position:relative;overflow:hidden;background:linear-gradient(170deg,#eaf7f2,#f5fcf8 40%,#e0f2ec)}
+.app.shake{animation:screenShake .4s ease-out}
+@keyframes screenShake{0%,100%{transform:translateX(0)}15%{transform:translateX(-6px) rotate(-.5deg)}30%{transform:translateX(5px) rotate(.5deg)}45%{transform:translateX(-4px)}60%{transform:translateX(3px)}}
+.hdr{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(255,255,255,.85);border-bottom:1px solid rgba(0,180,130,.12);z-index:10;backdrop-filter:blur(10px)}
+.hdr-left{display:flex;align-items:center;gap:8px}
+.hdr-icon{width:30px;height:30px;border-radius:10px;background:linear-gradient(135deg,#e53935,#fdd835,#43a047,#1e88e5);font-size:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 10px rgba(255,215,0,.3)}
+.hdr-title{font-family:'Fredoka',sans-serif;font-size:20px;font-weight:700;color:#1a3a2f}
+.tk{display:flex;align-items:center;gap:4px;font-size:13px;font-weight:700}.tk em{font-style:normal;font-size:15px}.tk span{color:var(--gold)}
+.tracker{display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 14px;background:rgba(0,180,130,.04);border-bottom:1px solid rgba(0,180,130,.08)}
+.td{width:30px;height:30px;border-radius:50%;background:rgba(0,150,110,.06);border:2px solid rgba(0,150,110,.15);display:flex;align-items:center;justify-content:center;font-family:'Fredoka',sans-serif;font-size:12px;font-weight:600;color:var(--dim);transition:all .3s}
+.td.now{border-color:var(--cyan);color:var(--cyan);background:rgba(0,191,165,.1)}
+.td.win{border-color:var(--green);color:#fff;background:rgba(0,200,83,.25)}
+.td.lose{border-color:var(--red);color:var(--red);background:rgba(255,61,87,.1)}
+.tl{width:16px;height:2px;background:rgba(0,150,110,.12)}.tl.done{background:rgba(0,191,165,.4)}
+.ttl{font-family:'Fredoka',sans-serif;font-size:15px;color:var(--cyan);margin-left:10px;min-width:55px}
+.ttl.bump{animation:tbump .35s ease-out}
+@keyframes tbump{0%{transform:scale(1)}50%{transform:scale(1.35)}100%{transform:scale(1)}}
+.my-color{display:flex;align-items:center;justify-content:center;gap:8px;padding:6px 14px;min-height:34px}
+.my-color-dot{width:24px;height:24px;border-radius:8px;border:2px solid rgba(0,0,0,.15)}
+.my-color-label{font-size:11px;color:var(--dim)}
+.my-color-name{font-family:'Fredoka',sans-serif;font-size:14px;font-weight:600;color:#1a3a2f}
+
+/* === 3D DICE === */
+.dice-zone{display:flex;justify-content:center;gap:18px;padding:12px 20px 16px;perspective:600px;min-height:110px;align-items:center}
+.die-wrap{width:70px;height:70px;perspective:600px;position:relative}
+.die-cube{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .8s cubic-bezier(.25,.46,.45,.94);transform:rotateX(-20deg) rotateY(25deg)}
+.die-cube.rolling{animation:diceRoll .3s linear infinite}
+@keyframes diceRoll{0%{transform:rotateX(0) rotateY(0) rotateZ(0)}100%{transform:rotateX(360deg) rotateY(180deg) rotateZ(90deg)}}
+.die-face3d{position:absolute;width:70px;height:70px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'Fredoka',sans-serif;font-size:11px;font-weight:600;color:rgba(0,0,0,.35);backface-visibility:hidden;border:2px solid rgba(0,0,0,.08)}
+.die-face3d.front{transform:translateZ(35px)}
+.die-face3d.back{transform:rotateY(180deg) translateZ(35px)}
+.die-face3d.right{transform:rotateY(90deg) translateZ(35px)}
+.die-face3d.left{transform:rotateY(-90deg) translateZ(35px)}
+.die-face3d.top{transform:rotateX(90deg) translateZ(35px)}
+.die-face3d.bottom{transform:rotateX(-90deg) translateZ(35px)}
+
+/* Settled states */
+.die-wrap.matched{filter:drop-shadow(0 0 14px var(--match-glow))}
+.die-wrap.missed{opacity:.45;transform:scale(.88);transition:all .3s}
+.die-badge{position:absolute;top:-10px;right:-10px;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;z-index:5;box-shadow:0 2px 8px rgba(0,0,0,.3);opacity:0;transition:opacity .2s}
+.die-badge.show{opacity:1;animation:badgePop .35s cubic-bezier(.175,.885,.32,1.275)}
+.die-badge.match{background:var(--green);color:#fff}
+.die-badge.miss{background:rgba(100,100,100,.8);color:#999;font-size:12px}
+@keyframes badgePop{0%{transform:scale(0)}60%{transform:scale(1.3)}100%{transform:scale(1)}}
+
+.payout{display:flex;gap:5px;justify-content:center;padding:8px 14px}
+.pay{background:rgba(255,255,255,.7);border-radius:10px;padding:8px 6px;text-align:center;flex:1;border:1px solid rgba(0,150,110,.1);transition:all .3s}
+.pay .pm{font-size:10px;color:var(--dim);margin-bottom:2px}.pay .pr{font-family:'Fredoka',sans-serif;font-size:17px;font-weight:700;color:var(--gold)}
+.pay.hit{background:rgba(232,168,0,.15);border-color:rgba(232,168,0,.4);transform:scale(1.12);box-shadow:0 0 16px rgba(255,215,0,.2)}
+.match-strip{display:flex;align-items:center;justify-content:center;gap:6px;min-height:32px;padding:4px}
+.ms-dot{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;border:2px solid;animation:msDotPop .3s cubic-bezier(.175,.885,.32,1.275)}
+@keyframes msDotPop{0%{transform:scale(0)}100%{transform:scale(1)}}
+.ms-label{font-family:'Fredoka',sans-serif;font-size:16px;font-weight:700;margin-left:6px}
+.board-area{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px 14px}
+.blabel{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.board{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;width:100%;max-width:240px}
+.cb{aspect-ratio:1.3;border-radius:12px;border:3px solid transparent;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.cb:active:not(.off){transform:scale(.93)}
+.cb.sel{border-color:#fff;box-shadow:0 0 20px rgba(255,255,255,.25);transform:scale(1.06)}
+.cb.off{cursor:default;opacity:.4;transform:none!important}
+.cb .cn{font-family:'Fredoka',sans-serif;font-size:11px;font-weight:600;color:rgba(0,0,0,.5)}
+.cb.sel-glow{animation:selGlow 1s ease-in-out infinite alternate}
+@keyframes selGlow{0%{box-shadow:0 0 10px rgba(255,255,255,.15)}100%{box-shadow:0 0 25px rgba(255,255,255,.35)}}
+.c-red{background:linear-gradient(135deg,#ef5350,#c62828)}.c-blue{background:linear-gradient(135deg,#42a5f5,#1565c0)}.c-green{background:linear-gradient(135deg,#66bb6a,#2e7d32)}.c-yellow{background:linear-gradient(135deg,#ffee58,#f9a825)}.c-yellow .cn{color:rgba(0,0,0,.4)}.c-pink{background:linear-gradient(135deg,#f06292,#ad1457)}.c-orange{background:linear-gradient(135deg,#ffb74d,#e65100)}
+.bot{padding:8px 14px 16px;background:rgba(16,50,50,.95);border-top:1px solid rgba(255,215,0,.1);z-index:10}
+.hint{text-align:center;font-size:12px;color:var(--dim);margin-bottom:7px;min-height:16px}.hint strong{color:var(--gold)}
+.btn{border:none;border-radius:13px;font-family:'Fredoka',sans-serif;font-size:15px;font-weight:600;padding:14px 24px;cursor:pointer;transition:all .12s;width:100%}
+.btn:active:not(:disabled){transform:scale(.95)}
+.btn-roll{background:linear-gradient(135deg,#00bfa5,#009688);color:#fff}
+.btn-roll:disabled{opacity:.3;cursor:not-allowed}
+.ov{position:absolute;inset:0;background:rgba(230,245,240,.96);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:50;backdrop-filter:blur(14px);padding:24px;text-align:center}
+.ov.hidden{display:none}
+.ov-emoji{font-size:56px;margin-bottom:8px;animation:boin .5s cubic-bezier(.175,.885,.32,1.275)}
+@keyframes boin{0%{transform:scale(0)}60%{transform:scale(1.2)}100%{transform:scale(1)}}
+.ov-title{font-family:'Fredoka',sans-serif;font-size:28px;font-weight:700;margin-bottom:4px;color:#1a3a2f}
+.ov-sub{font-size:14px;color:var(--dim);margin-bottom:6px}
+.ov-reward{font-family:'Fredoka',sans-serif;font-size:44px;font-weight:700;color:#e8a800;text-shadow:0 4px 20px rgba(255,215,0,.4);margin:10px 0}
+.ov-detail{font-size:12px;color:var(--dim);margin-bottom:14px}
+.ov-btn{width:100%;max-width:260px;padding:14px;border:none;border-radius:13px;font-family:'Fredoka',sans-serif;font-size:16px;font-weight:600;cursor:pointer;margin:4px 0}
+.ov-btn:active{transform:scale(.95)}
+.ov-btn-gold{background:linear-gradient(135deg,#00bfa5,#009688);color:#fff}
+.ov-btn-green{background:linear-gradient(135deg,#00c853,#009624);color:#fff}
+.rb{display:flex;gap:6px;justify-content:center;margin:8px 0}
+.ri{background:rgba(255,255,255,.7);border-radius:10px;padding:6px 12px;text-align:center;min-width:65px}
+.ri .rl{font-size:10px;color:var(--dim)}.ri .rv{font-family:'Fredoka',sans-serif;font-size:18px;font-weight:700}.ri .rm{font-size:9px;color:var(--dim)}
+.w-colors{display:flex;gap:8px;justify-content:center;margin-bottom:20px}
+.w-dot{width:38px;height:38px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.how{background:rgba(0,150,110,.06);border-radius:12px;padding:12px 14px;margin:14px 0;text-align:left;width:100%;max-width:300px}
+.how-t{font-family:'Fredoka',sans-serif;font-size:13px;color:#00897b;margin-bottom:6px}
+.how-s{font-size:12px;color:var(--dim);line-height:1.8}
+.flash{position:absolute;top:35%;left:50%;transform:translate(-50%,-50%);font-family:'Fredoka',sans-serif;font-size:42px;font-weight:700;pointer-events:none;z-index:30;white-space:nowrap;text-shadow:0 4px 20px rgba(0,0,0,.6);animation:flashIn .9s ease-out forwards}
+@keyframes flashIn{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}15%{opacity:1;transform:translate(-50%,-50%) scale(1.2)}30%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(.8) translateY(-30px)}}
+.confetti{position:absolute;pointer-events:none;z-index:30;border-radius:2px}
+@keyframes confetti-fall{0%{opacity:1;transform:translateY(0) rotate(0)}100%{opacity:0;transform:translateY(100vh) rotate(720deg)}}
+.server-error{position:absolute;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(255,61,87,.9);color:#fff;border-radius:10px;padding:8px 16px;font-size:13px;font-weight:700;z-index:40;white-space:nowrap;animation:fadeInUp .3s ease-out}
+@keyframes fadeInUp{0%{opacity:0;transform:translateX(-50%) translateY(10px)}100%{opacity:1;transform:translateX(-50%) translateY(0)}}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+<div class="hdr"><div class="hdr-left"><div class="hdr-icon">🎲</div><span class="hdr-title">Color Game</span></div><div class="tk"><em>🎟️</em> <span id="tkC">0</span></div></div>
+<div class="tracker"><div class="td" id="td0">1</div><div class="tl" id="tl0"></div><div class="td" id="td1">2</div><div class="tl" id="tl1"></div><div class="td" id="td2">3</div><div class="ttl" id="ttl">🎟️ 0</div></div>
+<div class="my-color" id="myColor"></div>
+<div class="dice-zone" id="diceZone">
+  <div class="die-wrap" id="dw0"><div class="die-cube" id="dc0"></div><div class="die-badge" id="b0"></div></div>
+  <div class="die-wrap" id="dw1"><div class="die-cube" id="dc1"></div><div class="die-badge" id="b1"></div></div>
+  <div class="die-wrap" id="dw2"><div class="die-cube" id="dc2"></div><div class="die-badge" id="b2"></div></div>
+</div>
+<div class="match-strip" id="matchStrip"></div>
+<div class="payout"><div class="pay" id="p0"><div class="pm">0 match</div><div class="pr">💀</div></div><div class="pay" id="p1"><div class="pm">1 match</div><div class="pr">3 tix</div></div><div class="pay" id="p2"><div class="pm">2 match</div><div class="pr">8 tix</div></div><div class="pay" id="p3"><div class="pm">3 match</div><div class="pr">20 tix</div></div></div>
+<div class="board-area"><div class="blabel" id="bL">🎨 Pick your color!</div><div class="board" id="board"></div></div>
+<div class="bot"><div class="hint" id="hint">Pick your color!</div><div id="btns"><button class="btn btn-roll" id="btnR" onclick="roll()" disabled>🎲 ROLL!</button></div></div>
+<div class="ov" id="ovW"><div class="w-colors"><div class="w-dot c-red"></div><div class="w-dot c-blue"></div><div class="w-dot c-green"></div><div class="w-dot c-yellow"></div><div class="w-dot c-pink"></div><div class="w-dot c-orange"></div></div><div class="ov-title" style="color:var(--gold)">🎲 COLOR GAME</div><div class="ov-sub">Classic Perya — 3 Rounds!</div><div class="how"><div class="how-t">🎯 Paano Laruin</div><div class="how-s">🎨 Pick 1 of 6 colors<br>🎲 Roll 3 dice!<br>✅ Matches = Rewards!<br>🔄 3 rounds → Total!</div></div><button class="ov-btn ov-btn-gold" onclick="startGame()">LARO NA! 🎲</button></div>
+<div class="ov hidden" id="ovF"><div class="ov-emoji" id="fE"></div><div class="ov-title" id="fT"></div><div class="ov-sub" id="fS"></div><div class="rb" id="fB"></div><div class="ov-reward" id="fR"></div><div class="ov-detail" id="fD"></div></div>
+</div>
+<script>
+var COL=[
+  {id:'red',name:'Pula',css:'c-red',hex:'#e53935'},
+  {id:'blue',name:'Asul',css:'c-blue',hex:'#1e88e5'},
+  {id:'green',name:'Berde',css:'c-green',hex:'#43a047'},
+  {id:'yellow',name:'Dilaw',css:'c-yellow',hex:'#fdd835'},
+  {id:'pink',name:'Rosas',css:'c-pink',hex:'#e91e9f'},
+  {id:'orange',name:'Orange',css:'c-orange',hex:'#ff9800'}
+];
+var RW=[0,3,8,20];
+var G={ph:'pick',rnd:0,sel:-1,rR:[],rM:[],tot:0,pendingRollResult:null};
+var pendingActionResolve=null;
+
+var FACE_ROT=[
+  'rotateX(0) rotateY(0)',
+  'rotateY(180deg)',
+  'rotateY(-90deg)',
+  'rotateY(90deg)',
+  'rotateX(-90deg)',
+  'rotateX(90deg)'
+];
+
+function postToHost(msg){
+  var s=JSON.stringify(msg);
+  if(window.ReactNativeWebView){window.ReactNativeWebView.postMessage(s)}
+  else if(window.parent&&window.parent!==window){window.parent.postMessage(s,'*')}
+  else{window.postMessage(s,'*')}
+}
+
+window.addEventListener('message',function(e){
+  try{
+    var data=typeof e.data==='string'?JSON.parse(e.data):e.data;
+    if(data.type==='HOST_CONFIG'){
+    } else if(data.type==='HOST_ACTION_RESULT'&&pendingActionResolve){
+      var fn=pendingActionResolve;
+      pendingActionResolve=null;
+      fn(data);
+    }
+  }catch(_){}
+});
+
+function sendAction(chosenColor){
+  return new Promise(function(resolve,reject){
+    var actionId='color_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+    pendingActionResolve=function(result){
+      if(result.outcome==='noop'&&result.status==='in_progress'&&result.rewardPreview===0&&result.roll===0){
+        reject(new Error('Server error'));
+      } else {
+        resolve(result);
+      }
+    };
+    postToHost({type:'GAME_ACTION',payload:{choice:String(chosenColor)},actionId:actionId});
+    setTimeout(function(){
+      if(pendingActionResolve){
+        pendingActionResolve=null;
+        reject(new Error('Timeout'));
+      }
+    },15000);
+  });
+}
+
+function buildDiceFaces(cubeEl){
+  cubeEl.innerHTML='';
+  var faces=['front','back','right','left','top','bottom'];
+  for(var i=0;i<6;i++){
+    var f=document.createElement('div');
+    f.className='die-face3d '+faces[i];
+    f.style.background=COL[i].hex;
+    f.textContent=COL[i].name;
+    cubeEl.appendChild(f);
+  }
+}
+
+function initDice(){
+  for(var i=0;i<3;i++){
+    buildDiceFaces(document.getElementById('dc'+i));
+    var cube=document.getElementById('dc'+i);
+    cube.className='die-cube';
+    cube.style.transform='rotateX(-20deg) rotateY(25deg)';
+    var wrap=document.getElementById('dw'+i);
+    wrap.className='die-wrap';
+    wrap.style='';
+    var badge=document.getElementById('b'+i);
+    badge.className='die-badge';badge.textContent='';
+  }
+}
+
+function renderBoard(){
+  var b=document.getElementById('board');b.innerHTML='';
+  COL.forEach(function(c,i){
+    var d=document.createElement('div');
+    d.className='cb '+c.css;
+    if(G.sel===i){d.classList.add('sel');d.classList.add('sel-glow')}
+    if(G.ph!=='pick')d.classList.add('off');
+    d.innerHTML='<span class="cn">'+c.name+'</span>';
+    d.onclick=function(){pick(i)};
+    b.appendChild(d);
+  });
+}
+
+function pick(i){if(G.ph!=='pick')return;G.sel=i;renderBoard();document.getElementById('btnR').disabled=false;document.getElementById('hint').innerHTML='<strong>'+COL[i].name+'</strong> — 🎲 ROLL!';updateMyColor()}
+
+function updateMyColor(){
+  var mc=document.getElementById('myColor');
+  if(G.sel<0){mc.innerHTML='';return}
+  mc.innerHTML='<span class="my-color-label">My color →</span><div class="my-color-dot" style="background:'+COL[G.sel].hex+'"></div><span class="my-color-name">'+COL[G.sel].name+'</span>';
+}
+
+function updateTracker(){
+  for(var i=0;i<3;i++){var d=document.getElementById('td'+i),l=document.getElementById('tl'+i);d.className='td';if(i<G.rnd){d.classList.add(G.rM[i]>0?'win':'lose');d.textContent=G.rM[i]>0?'+'+G.rR[i]:'✕';if(l)l.className='tl done'}else if(i===G.rnd){d.classList.add('now');d.textContent=i+1;if(l)l.className='tl'}else{d.textContent=i+1;if(l)l.className='tl'}}
+  var t=document.getElementById('ttl');t.textContent='🎟️ '+G.tot;t.classList.remove('bump');void t.offsetWidth;t.classList.add('bump');
+  document.getElementById('tkC').textContent=G.tot;
+}
+
+function showServerError(msg){
+  var existing=document.querySelector('.server-error');
+  if(existing)existing.remove();
+  var el=document.createElement('div');
+  el.className='server-error';
+  el.textContent=msg||'Server error. Try again.';
+  document.getElementById('app').appendChild(el);
+  setTimeout(function(){el.remove()},3000);
+  postToHost({type:'GAME_ERROR',message:msg||'Server error. Please try again.'});
+}
+
+function roll(){
+  if(G.ph!=='pick'||G.sel<0)return;
+  G.ph='rolling';
+  document.getElementById('btnR').disabled=true;
+  document.getElementById('bL').textContent='🎲 Rolling...';
+  document.getElementById('hint').textContent='Waiting for server...';
+  document.getElementById('matchStrip').innerHTML='';
+  document.querySelectorAll('.pay').forEach(function(p){p.classList.remove('hit')});
+
+  for(var i=0;i<3;i++){
+    var cube=document.getElementById('dc'+i);
+    cube.className='die-cube rolling';
+    document.getElementById('dw'+i).className='die-wrap';
+    document.getElementById('dw'+i).style='';
+    document.getElementById('b'+i).className='die-badge';
+    document.getElementById('b'+i).textContent='';
+  }
+
+  var chosenColor=G.sel;
+  sendAction(chosenColor).then(function(result){
+    var detail=result.detail||{};
+    var diceResults=detail.diceResults||[0,0,0];
+    var matches=typeof detail.matches==='number'?detail.matches:0;
+    var reward=typeof detail.roundReward==='number'?detail.roundReward:0;
+    var totalReward=typeof result.rewardPreview==='number'?result.rewardPreview:G.tot+reward;
+    var status=result.status;
+
+    G.rM.push(matches);
+    G.rR.push(reward);
+    G.tot=totalReward;
+
+    setTimeout(function(){settleDie(0,diceResults[0],chosenColor)},900);
+    setTimeout(function(){settleDie(1,diceResults[1],chosenColor)},1500);
+    setTimeout(function(){settleDie(2,diceResults[2],chosenColor)},2100);
+
+    setTimeout(function(){resolveRound(diceResults,matches,reward,chosenColor,status)},2800);
+  }).catch(function(err){
+    G.ph='pick';
+    initDice();
+    renderBoard();
+    document.getElementById('bL').textContent='🎨 Pick your color!';
+    document.getElementById('hint').textContent='Pick your color!';
+    document.getElementById('btnR').disabled=(G.sel<0);
+    showServerError(err&&err.message==='Timeout'?'Server timeout. Please try again.':'Server error. Please try again.');
+  });
+}
+
+function settleDie(idx,ci,selColor){
+  var cube=document.getElementById('dc'+idx);
+  cube.className='die-cube';
+  cube.style.transform=FACE_ROT[ci];
+  cube.style.transition='transform .6s cubic-bezier(.25,.46,.45,.94)';
+
+  setTimeout(function(){
+    var isMatch=ci===selColor;
+    var wrap=document.getElementById('dw'+idx);
+    var badge=document.getElementById('b'+idx);
+    if(isMatch){
+      wrap.classList.add('matched');
+      wrap.style.setProperty('--match-glow',COL[ci].hex);
+      badge.className='die-badge match show';
+      badge.textContent='✓';
+    }else{
+      wrap.classList.add('missed');
+      badge.className='die-badge miss show';
+      badge.textContent='✕';
+    }
+  },650);
+}
+
+function resolveRound(diceResults,matches,reward,chosenColor,status){
+  document.getElementById('p'+matches).classList.add('hit');
+
+  var strip=document.getElementById('matchStrip');
+  var h='';
+  diceResults.forEach(function(ci){
+    var m=ci===chosenColor;
+    h+='<div class="ms-dot" style="background:'+(m?COL[ci].hex+'33':'rgba(255,255,255,.05)')+';border-color:'+(m?COL[ci].hex:'rgba(255,255,255,.15)')+'">'+( m?'✓':'✕')+'</div>';
+  });
+  if(matches===3)h+='<span class="ms-label" style="color:var(--gold)">TRIPLE! +20 🎟️</span>';
+  else if(matches===2)h+='<span class="ms-label" style="color:var(--gold)">DOUBLE! +8 🎟️</span>';
+  else if(matches===1)h+='<span class="ms-label" style="color:var(--green)">+3 🎟️</span>';
+  else h+='<span class="ms-label" style="color:var(--red)">MISS!</span>';
+  strip.innerHTML=h;
+
+  if(matches>=2){var a=document.getElementById('app');a.classList.remove('shake');void a.offsetWidth;a.classList.add('shake')}
+  var fl=document.createElement('div');fl.className='flash';
+  if(matches===3){fl.textContent='🎉 TRIPLE!';fl.style.color='#ffd700';spawnConfetti(50)}
+  else if(matches===2){fl.textContent='🔥 DOUBLE!';fl.style.color='#ffd700';spawnConfetti(25)}
+  else if(matches===1){fl.textContent='👍 MATCH!';fl.style.color='#00e676'}
+  else{fl.textContent='💨 MISS';fl.style.color='#ff3d57';fl.style.fontSize='36px'}
+  document.getElementById('app').appendChild(fl);setTimeout(function(){fl.remove()},900);
+
+  updateTracker();G.rnd++;
+
+  if(status==='awaiting_finalize'){
+    setTimeout(showFinal,1400);
+  } else {
+    document.getElementById('hint').innerHTML='Round '+(G.rnd+1)+' — Pick a color!';
+    setTimeout(function(){
+      G.ph='pick';G.sel=-1;initDice();renderBoard();updateMyColor();
+      document.getElementById('bL').textContent='🎨 Pick your color!';
+      document.getElementById('btnR').disabled=true;
+      document.querySelectorAll('.pay').forEach(function(p){p.classList.remove('hit')});
+      document.getElementById('matchStrip').innerHTML='';
+    },1400);
+  }
+}
+
+function showFinal(){
+  G.ph='done';var t=G.tot;
+  document.getElementById('fB').innerHTML=G.rR.map(function(r,i){var m=G.rM[i];return'<div class="ri"><div class="rl">R'+(i+1)+'</div><div class="rv" style="color:'+(r>0?'var(--gold)':'var(--red)')+'">'+(r>0?'+'+r:'✕')+'</div><div class="rm">'+m+' match</div></div>'}).join('');
+  if(t>=20){document.getElementById('fE').textContent='🏆';document.getElementById('fT').textContent='JACKPOT!';document.getElementById('fT').style.color='#ffd700';document.getElementById('fS').textContent='Malaking panalo!'}
+  else if(t>=8){document.getElementById('fE').textContent='🔥';document.getElementById('fT').textContent='MAGALING!';document.getElementById('fT').style.color='#ffd700';document.getElementById('fS').textContent='Magaling ka!'}
+  else if(t>0){document.getElementById('fE').textContent='👍';document.getElementById('fT').textContent='NICE!';document.getElementById('fT').style.color='var(--green)';document.getElementById('fS').textContent='3 rounds total'}
+  else{document.getElementById('fE').textContent='😅';document.getElementById('fT').textContent='SAYANG!';document.getElementById('fT').style.color='var(--red)';document.getElementById('fS').textContent='All 3 rounds missed...'}
+  var amt=t>0?t:1;
+  document.getElementById('fR').textContent=t>0?'+'+t+' 🎟️':'+1 🎟️';
+  document.getElementById('fD').textContent='';
+  document.getElementById('ovF').classList.remove('hidden');
+  if(t>=8)spawnConfetti(40);
+}
+
+function spawnConfetti(n){var app=document.getElementById('app');var cls=['#e53935','#1e88e5','#43a047','#fdd835','#e91e9f','#ff9800','#00bfa5'];for(var i=0;i<n;i++){var c=document.createElement('div');c.className='confetti';var sz=4+Math.random()*5,x=Math.random()*100,dur=1.2+Math.random()*1.5,dl=Math.random()*.5;c.style.cssText='left:'+x+'%;top:-10px;width:'+sz+'px;height:'+(sz*2.5)+'px;background:'+cls[0|Math.random()*cls.length]+';transform:rotate('+(Math.random()*360)+'deg);animation:confetti-fall '+dur+'s '+dl+'s ease-in forwards';app.appendChild(c);setTimeout((function(el){return function(){el.remove()}})(c),(dur+dl)*1000)}}
+function startGame(){document.getElementById('ovW').classList.add('hidden');G.ph='pick';G.rnd=0;G.sel=-1;G.rR=[];G.rM=[];G.tot=0;initDice();updateTracker();renderBoard();updateMyColor();document.getElementById('matchStrip').innerHTML='';document.getElementById('bL').textContent='🎨 Pick your color!';document.getElementById('hint').textContent='Pick your color!';document.getElementById('btnR').disabled=true;document.querySelectorAll('.pay').forEach(function(p){p.classList.remove('hit')})}
+initDice();renderBoard();updateTracker();
+</script>
+</body>
+</html>
