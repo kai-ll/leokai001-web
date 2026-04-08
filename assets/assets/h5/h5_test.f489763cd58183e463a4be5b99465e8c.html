@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>H5 Protocol Tester</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #F8FAFC;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px;
+    gap: 20px;
+  }
+  .header { text-align: center; }
+  .header h1 { font-size: 22px; font-weight: 800; color: #0F172A; margin-bottom: 4px; }
+  .header p { font-size: 13px; color: #64748B; }
+
+  .card {
+    width: 100%;
+    max-width: 360px;
+    background: #fff;
+    border-radius: 16px;
+    border: 1.5px solid #E2E8F0;
+    padding: 16px;
+  }
+  .card-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #64748B;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 12px;
+  }
+  .kv-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid #F1F5F9;
+    font-size: 14px;
+  }
+  .kv-row:last-child { border-bottom: none; }
+  .kv-label { color: #475569; font-weight: 600; }
+  .kv-value { color: #0F172A; font-weight: 700; font-family: monospace; }
+
+  .rounds-control {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .rounds-stepper {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .rounds-stepper button {
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: #F8FAFC;
+    font-size: 18px;
+    font-weight: 700;
+    color: #334155;
+    cursor: pointer;
+    transition: background 0.1s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .rounds-stepper button:active { background: #E2E8F0; }
+  .rounds-stepper span {
+    width: 44px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 800;
+    color: #0F172A;
+    border-left: 1.5px solid #E2E8F0;
+    border-right: 1.5px solid #E2E8F0;
+    line-height: 36px;
+  }
+  .rounds-hint { font-size: 12px; color: #94A3B8; }
+
+  .progress-wrap {
+    width: 100%;
+    max-width: 360px;
+  }
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .progress-label { font-size: 13px; font-weight: 700; color: #475569; }
+  .progress-counter { font-size: 13px; font-weight: 800; color: #0F172A; font-family: monospace; }
+  .progress-track {
+    width: 100%;
+    height: 10px;
+    background: #E2E8F0;
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: #0F172A;
+    border-radius: 99px;
+    transition: width 0.3s ease;
+    width: 0%;
+  }
+
+  .round-dots {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+  .dot {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #E2E8F0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    transition: background 0.2s, color 0.2s;
+    color: #94A3B8;
+  }
+  .dot.win  { background: #DCFCE7; color: #15803D; }
+  .dot.lose { background: #FEE2E2; color: #B91C1C; }
+  .dot.draw { background: #FEF9C3; color: #92400E; }
+  .dot.pending { background: #F1F5F9; color: #CBD5E1; }
+
+  .section { width: 100%; max-width: 360px; }
+  .section-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #64748B;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 10px;
+  }
+  .btn-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .btn-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .btn {
+    border: none;
+    border-radius: 12px;
+    padding: 14px 10px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.1s, opacity 0.1s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none !important; }
+  .btn:active:not(:disabled) { transform: scale(0.96); opacity: 0.85; }
+  .btn-icon { font-size: 22px; }
+  .btn-rock     { background: #DBEAFE; color: #1D4ED8; }
+  .btn-scissors { background: #FEF9C3; color: #92400E; }
+  .btn-paper    { background: #DCFCE7; color: #15803D; }
+  .btn-gameover { background: #F0FDF4; color: #15803D; }
+  .btn-error    { background: #F1F5F9; color: #475569; }
+  .btn-finish {
+    background: #0F172A; color: #F8FAFC;
+    border-radius: 12px; padding: 16px;
+    font-size: 15px; font-weight: 800;
+    width: 100%; max-width: 360px;
+    border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: transform 0.1s, opacity 0.1s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn-finish:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn-finish:active:not(:disabled) { transform: scale(0.97); opacity: 0.85; }
+  .btn-finish .btn-icon { font-size: 20px; }
+
+  .result-box { width: 100%; max-width: 360px; background: #fff; border-radius: 16px; border: 1.5px solid #E2E8F0; padding: 16px; }
+  .result-box h2 { font-size: 13px; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 10px; }
+  .outcome-win      { background: #DCFCE7; color: #15803D; border-radius: 6px; padding: 2px 8px; }
+  .outcome-lose     { background: #FEE2E2; color: #B91C1C; border-radius: 6px; padding: 2px 8px; }
+  .outcome-draw     { background: #FEF9C3; color: #92400E; border-radius: 6px; padding: 2px 8px; }
+  .outcome-continue { background: #DBEAFE; color: #1D4ED8; border-radius: 6px; padding: 2px 8px; }
+  .outcome-noop     { background: #F1F5F9; color: #475569; border-radius: 6px; padding: 2px 8px; }
+
+  .log-box {
+    width: 100%; max-width: 360px;
+    background: #0F172A; border-radius: 12px;
+    padding: 12px; min-height: 80px; max-height: 140px; overflow-y: auto;
+  }
+  .log-entry { font-size: 12px; font-family: monospace; color: #94A3B8; line-height: 1.6; }
+  .log-entry.sent { color: #34D399; }
+  .log-entry.recv { color: #60A5FA; }
+  .log-entry.err  { color: #F87171; }
+
+  .awaiting-banner {
+    width: 100%; max-width: 360px;
+    background: #F0FDF4; border: 1.5px solid #BBF7D0;
+    border-radius: 12px; padding: 12px 16px;
+    text-align: center; font-size: 14px; font-weight: 700; color: #15803D;
+    display: none;
+  }
+  .error-banner {
+    width: 100%; max-width: 360px;
+    background: #FFF1F2; border: 1.5px solid #FECDD3;
+    border-radius: 12px; padding: 14px 16px;
+    display: none; flex-direction: column; gap: 6px;
+  }
+  .error-banner-title { font-size: 13px; font-weight: 800; color: #B91C1C; text-transform: uppercase; letter-spacing: 0.5px; }
+  .error-banner-msg { font-size: 13px; font-family: monospace; color: #7F1D1D; word-break: break-all; line-height: 1.5; }
+  .error-banner-hint { font-size: 12px; color: #B91C1C; margin-top: 2px; opacity: 0.75; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>H5 Protocol Tester</h1>
+  <p>Test HOST_CONFIG / GAME_ACTION / HOST_ACTION_RESULT flow</p>
+</div>
+
+<div class="card">
+  <div class="card-title">HOST_CONFIG (from host)</div>
+  <div class="kv-row">
+    <span class="kv-label">gameType</span>
+    <span class="kv-value" id="cfg-gameType">—</span>
+  </div>
+  <div class="kv-row">
+    <span class="kv-label">maxReward</span>
+    <span class="kv-value" id="cfg-maxReward">—</span>
+  </div>
+  <div class="kv-row" style="border-bottom:none">
+    <span class="kv-label">minReward</span>
+    <span class="kv-value" id="cfg-minReward">—</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Round Settings</div>
+  <div class="kv-row" style="border-bottom:none">
+    <span class="kv-label">Total Rounds</span>
+    <div class="rounds-control">
+      <div class="rounds-stepper">
+        <button onclick="changeRounds(-1)">−</button>
+        <span id="roundsDisplay">3</span>
+        <button onclick="changeRounds(1)">+</button>
+      </div>
+      <span class="rounds-hint">액션 횟수</span>
+    </div>
+  </div>
+</div>
+
+<div class="progress-wrap" id="progressWrap" style="display:none">
+  <div class="progress-header">
+    <span class="progress-label">Round Progress</span>
+    <span class="progress-counter"><span id="progressCurrent">0</span> / <span id="progressTotal">3</span></span>
+  </div>
+  <div class="progress-track">
+    <div class="progress-fill" id="progressFill"></div>
+  </div>
+  <div class="round-dots" id="roundDots"></div>
+</div>
+
+<div class="result-box" id="resultBox" style="display:none">
+  <h2>HOST_ACTION_RESULT (last response)</h2>
+  <div class="kv-row">
+    <span class="kv-label">outcome</span>
+    <span class="kv-value" id="res-outcome">—</span>
+  </div>
+  <div class="kv-row">
+    <span class="kv-label">rewardPreview</span>
+    <span class="kv-value" id="res-rewardPreview">—</span>
+  </div>
+  <div class="kv-row">
+    <span class="kv-label">status</span>
+    <span class="kv-value" id="res-status">—</span>
+  </div>
+  <div class="kv-row">
+    <span class="kv-label">roll</span>
+    <span class="kv-value" id="res-roll">—</span>
+  </div>
+  <div class="kv-row" style="border-bottom:none">
+    <span class="kv-label">detail</span>
+    <span class="kv-value" id="res-detail" style="font-size:11px;max-width:180px;word-break:break-all">—</span>
+  </div>
+</div>
+
+<div class="awaiting-banner" id="awaitingBanner">
+  status: awaiting_finalize — sending GAME_OVER automatically...
+</div>
+
+<div class="error-banner" id="errorBanner">
+  <div class="error-banner-title">Server Error</div>
+  <div class="error-banner-msg" id="errorBannerMsg"></div>
+  <div class="error-banner-hint">서버에 h5_test gameType이 등록되어 있지 않으면 이 에러가 발생합니다.</div>
+</div>
+
+<div class="section">
+  <button class="btn-finish" id="btnFinish" onclick="sendFinish()">
+    <span class="btn-icon">🏁</span>
+    Finish Game → Reward
+  </button>
+</div>
+
+<div class="section">
+  <div class="section-title">Send GAME_ACTION (choice)</div>
+  <div class="btn-grid">
+    <button class="btn btn-rock" id="btnRock" onclick="sendAction('rock')">
+      <span class="btn-icon">✊</span>
+      ROCK
+    </button>
+    <button class="btn btn-scissors" id="btnScissors" onclick="sendAction('scissors')">
+      <span class="btn-icon">✌️</span>
+      SCISSORS
+    </button>
+    <button class="btn btn-paper" id="btnPaper" onclick="sendAction('paper')">
+      <span class="btn-icon">🖐️</span>
+      PAPER
+    </button>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Other Messages</div>
+  <div class="btn-grid-2">
+    <button class="btn btn-gameover" onclick="sendGameOver()">
+      <span class="btn-icon">🏁</span>
+      GAME_OVER
+    </button>
+    <button class="btn btn-error" onclick="sendError()">
+      <span class="btn-icon">⚠️</span>
+      GAME_ERROR
+    </button>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Log</div>
+  <div class="log-box" id="logBox"></div>
+</div>
+
+<script>
+  var hostConfig = {};
+  var lastRewardPreview = 0;
+  var actionPending = false;
+  var totalRounds = 3;
+  var currentRound = 0;
+  var roundResults = [];
+  var gameStarted = false;
+
+  function changeRounds(delta) {
+    if (gameStarted) return;
+    totalRounds = Math.max(1, Math.min(10, totalRounds + delta));
+    document.getElementById('roundsDisplay').textContent = totalRounds;
+  }
+
+  function genActionId() {
+    return Date.now() + '_' + Math.random().toString(36).slice(2, 9);
+  }
+
+  function post(obj) {
+    var str = JSON.stringify(obj);
+    log('SENT: ' + str, 'sent');
+    try {
+      if (window.ReactNativeWebView) {
+        window.ReactNativeWebView.postMessage(str);
+      } else if (window.parent && window.parent !== window) {
+        window.parent.postMessage(str, '*');
+      } else {
+        window.postMessage(str, '*');
+      }
+    } catch(e) {
+      log('ERROR: ' + e.message, 'err');
+    }
+  }
+
+  function setActionButtonsDisabled(disabled) {
+    document.getElementById('btnRock').disabled = disabled;
+    document.getElementById('btnScissors').disabled = disabled;
+    document.getElementById('btnPaper').disabled = disabled;
+    document.getElementById('btnFinish').disabled = disabled;
+  }
+
+  function initProgress() {
+    document.getElementById('progressWrap').style.display = '';
+    document.getElementById('progressTotal').textContent = totalRounds;
+    document.getElementById('progressCurrent').textContent = 0;
+    document.getElementById('progressFill').style.width = '0%';
+    var dots = document.getElementById('roundDots');
+    dots.innerHTML = '';
+    for (var i = 0; i < totalRounds; i++) {
+      var dot = document.createElement('div');
+      dot.className = 'dot pending';
+      dot.id = 'dot-' + i;
+      dot.textContent = i + 1;
+      dots.appendChild(dot);
+    }
+  }
+
+  function updateProgress(roundIndex, outcome) {
+    var dot = document.getElementById('dot-' + roundIndex);
+    if (dot) {
+      dot.className = 'dot ' + outcome;
+      dot.textContent = outcome === 'win' ? '✓' : outcome === 'lose' ? '✗' : '=';
+    }
+    var filled = roundIndex + 1;
+    document.getElementById('progressCurrent').textContent = filled;
+    document.getElementById('progressFill').style.width = (filled / totalRounds * 100) + '%';
+  }
+
+  function sendFinish() {
+    if (actionPending) return;
+    actionPending = true;
+    setActionButtonsDisabled(true);
+    var actionId = genActionId();
+    post({ type: 'GAME_ACTION', payload: { finish: true }, actionId: actionId });
+  }
+
+  function sendAction(choice) {
+    if (actionPending) return;
+    actionPending = true;
+    setActionButtonsDisabled(true);
+    gameStarted = true;
+    if (!document.getElementById('progressWrap').style.display || document.getElementById('progressWrap').style.display === 'none') {
+      initProgress();
+    }
+    var actionId = genActionId();
+    post({ type: 'GAME_ACTION', payload: { choice: choice }, actionId: actionId });
+  }
+
+  function sendGameOver() {
+    post({ type: 'GAME_OVER', rewardPreview: lastRewardPreview });
+  }
+
+  function sendError() {
+    post({ type: 'GAME_ERROR', message: 'Test error from H5 game' });
+  }
+
+  function log(msg, cls) {
+    var box = document.getElementById('logBox');
+    var el = document.createElement('div');
+    el.className = 'log-entry ' + (cls || '');
+    el.textContent = msg;
+    box.appendChild(el);
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function applyActionResult(d) {
+    var errorBanner = document.getElementById('errorBanner');
+
+    if (d.error) {
+      errorBanner.style.display = 'flex';
+      document.getElementById('errorBannerMsg').textContent = d.error;
+      log('ERR: ' + d.error, 'err');
+      actionPending = false;
+      setActionButtonsDisabled(false);
+      return;
+    }
+
+    errorBanner.style.display = 'none';
+
+    var outcome = d.outcome || '—';
+    var rewardPreview = d.rewardPreview !== undefined ? d.rewardPreview : lastRewardPreview;
+    var status = d.status || '—';
+    var roll = d.roll !== undefined ? d.roll : '—';
+    var detail = d.detail ? JSON.stringify(d.detail) : '—';
+
+    lastRewardPreview = rewardPreview;
+
+    document.getElementById('resultBox').style.display = '';
+    var outEl = document.getElementById('res-outcome');
+    outEl.textContent = outcome;
+    outEl.className = 'kv-value outcome-' + outcome;
+    document.getElementById('res-rewardPreview').textContent = rewardPreview;
+    document.getElementById('res-status').textContent = status;
+    document.getElementById('res-roll').textContent = roll;
+    document.getElementById('res-detail').textContent = detail;
+
+    if (status === 'in_progress' && d.detail && d.detail.round !== undefined) {
+      var roundIdx = d.detail.round - 1;
+      updateProgress(roundIdx, outcome);
+      currentRound = d.detail.round;
+      roundResults.push(outcome);
+
+      actionPending = false;
+
+      if (currentRound >= totalRounds) {
+        log('All rounds complete — auto-sending finish', 'sent');
+        setTimeout(function() { sendFinish(); }, 400);
+      } else {
+        setActionButtonsDisabled(false);
+      }
+      return;
+    }
+
+    actionPending = false;
+
+    if (status === 'awaiting_finalize') {
+      setActionButtonsDisabled(true);
+      var banner = document.getElementById('awaitingBanner');
+      banner.style.display = '';
+      setTimeout(function() {
+        sendGameOver();
+        banner.style.display = 'none';
+      }, 1200);
+    } else {
+      setActionButtonsDisabled(false);
+    }
+  }
+
+  document.addEventListener('message', function(e) {
+    log('RECV: ' + e.data, 'recv');
+  });
+
+  window.addEventListener('message', function(e) {
+    if (typeof e.data !== 'string') return;
+    try {
+      var d = JSON.parse(e.data);
+      if (!d || !d.type) return;
+
+      if (d.type === 'HOST_CONFIG') {
+        hostConfig = d.config || {};
+        document.getElementById('cfg-gameType').textContent = hostConfig.gameType || '—';
+        document.getElementById('cfg-maxReward').textContent = hostConfig.maxReward !== undefined ? hostConfig.maxReward : '—';
+        document.getElementById('cfg-minReward').textContent = hostConfig.minReward !== undefined ? hostConfig.minReward : '—';
+        if (hostConfig.totalRounds && !gameStarted) {
+          totalRounds = hostConfig.totalRounds;
+          document.getElementById('roundsDisplay').textContent = totalRounds;
+        }
+        log('RECV: HOST_CONFIG ' + JSON.stringify(hostConfig), 'recv');
+      } else if (d.type === 'HOST_ACTION_RESULT') {
+        log('RECV: HOST_ACTION_RESULT ' + JSON.stringify(d), 'recv');
+        applyActionResult(d);
+      }
+    } catch(ex) {}
+  });
+</script>
+</body>
+</html>

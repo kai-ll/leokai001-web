@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Mines — StepPot</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none}
+:root{
+  --mint:#3ECFA0;--mint-deep:#1AA673;--mint-pale:#E5FBF2;
+  --gold:#FFB800;--gold-light:#FFE082;--gold-dark:#E09800;--gold-deeper:#9A6800;--gold-text:#B37400;
+  --red:#FF4757;--red-light:#FFE0E3;
+  --cyan:#00D2FF;--purple:#A855F7;
+  --bg:#F0FAF5;--bg-card:#FFFFFF;--bg-header:#1B2E4A;
+  --text:#1B2E4A;--text-mid:#5A7388;--text-light:#8DA4B8;
+  --rv-gem-text:#996600;
+}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);overflow:hidden;height:100dvh}
+
+@keyframes gemReveal{0%{transform:scale(.7) rotateY(90deg);opacity:0}50%{transform:scale(1.08) rotateY(-5deg);opacity:1}100%{transform:scale(1) rotateY(0)}}
+@keyframes mineExplode{0%{transform:scale(1)}15%{transform:scale(1.5) rotate(4deg)}30%{transform:scale(.85) rotate(-2deg)}50%{transform:scale(1.2)}100%{transform:scale(1)}}
+@keyframes shockwave{0%{box-shadow:0 0 0 0 rgba(255,71,87,.35)}100%{box-shadow:0 0 0 25px rgba(255,71,87,0)}}
+@keyframes shake{0%,100%{transform:translate(0)}10%{transform:translate(-5px,-2px) rotate(-1deg)}20%{transform:translate(4px,2px) rotate(.8deg)}30%{transform:translate(-3px,1px)}40%{transform:translate(2px,-1px)}50%{transform:translate(-1px)}60%{transform:translate(1px)}}
+@keyframes floatUp{0%{opacity:1;transform:translate(-50%,0) scale(1)}40%{opacity:1;transform:translate(-50%,-28px) scale(1.15)}100%{opacity:0;transform:translate(-50%,-65px) scale(1.3)}}
+@keyframes countPop{0%{transform:scale(1)}40%{transform:scale(1.35)}100%{transform:scale(1)}}
+@keyframes overlayIn{0%{opacity:0}100%{opacity:1}}
+@keyframes rewardBounce{0%{transform:scale(0) rotate(-8deg);opacity:0}50%{transform:scale(1.12) rotate(2deg);opacity:1}75%{transform:scale(.92)}100%{transform:scale(1)}}
+@keyframes confettiDrop{0%{opacity:1;transform:translateY(0) rotate(0deg)}100%{opacity:0;transform:translateY(120px) rotate(720deg)}}
+@keyframes btnShine{0%{left:-100%}100%{left:200%}}
+@keyframes screenGlow{0%{opacity:0}20%{opacity:1}100%{opacity:0}}
+@keyframes ringExpand{0%{transform:translate(-50%,-50%) scale(0);opacity:.9}100%{transform:translate(-50%,-50%) scale(5);opacity:0}}
+@keyframes megaText{0%{opacity:0;transform:translate(-50%,-50%) scale(0) rotate(-10deg)}25%{opacity:1;transform:translate(-50%,-50%) scale(1.3) rotate(2deg)}50%{opacity:1;transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(1.6)}}
+@keyframes edgePulse{0%{opacity:0}25%{opacity:1}100%{opacity:0}}
+@keyframes particleFly{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--px),var(--py)) scale(0)}}
+@keyframes breathe{0%,100%{opacity:.5}50%{opacity:1}}
+@keyframes bonusFlash{0%{background:rgba(255,184,0,0)}30%{background:rgba(255,184,0,.1)}100%{background:rgba(255,184,0,0)}}
+@keyframes screenZoom{0%{transform:scale(1)}30%{transform:scale(1.025)}100%{transform:scale(1)}}
+
+.root{width:100%;max-width:420px;margin:0 auto;height:100dvh;display:flex;flex-direction:column;position:relative;overflow:hidden;background:var(--bg)}
+.root.zoom{animation:screenZoom .4s ease-out}
+
+.header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:var(--bg-header);border-radius:0 0 20px 20px;position:relative;z-index:2}
+.h-left{display:flex;align-items:center;gap:10px}
+.h-icon{width:36px;height:36px;border-radius:12px;background:linear-gradient(135deg,var(--mint),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:18px}
+.h-name{font-family:'Fredoka',sans-serif;font-size:22px;font-weight:700;color:#fff}
+.ticket-pill{display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;background:rgba(255,184,0,.15);border:1.5px solid rgba(255,184,0,.3);font-family:'Fredoka',sans-serif;font-weight:700;font-size:15px;color:var(--gold)}
+
+.info{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;margin:10px 14px 0;border-radius:16px;background:var(--bg-card);box-shadow:0 2px 8px rgba(27,46,74,.08)}
+.col-display{display:flex;align-items:baseline;gap:6px;font-family:'Fredoka',sans-serif}
+.col-label{font-size:13px;color:var(--text-mid);font-weight:500}
+.col-num{font-size:30px;font-weight:700;color:var(--gold-deeper);transition:all .15s}
+.col-num.pop{animation:countPop .3s ease-out}
+.col-unit{font-size:14px;color:var(--text-mid);font-weight:600}
+.shield-pill{display:flex;align-items:center;gap:4px;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;font-family:'Fredoka',sans-serif}
+.shield-pill.on{background:rgba(62,207,160,.1);border:1.5px solid rgba(62,207,160,.3);color:var(--mint-deep)}
+.shield-pill.off{background:var(--red-light);border:1.5px solid rgba(255,71,87,.2);color:var(--red);opacity:.7}
+.gem-cnt{font-size:12px;color:var(--text-light);font-weight:700;font-family:'Fredoka',sans-serif}
+.info-right{display:flex;align-items:center;gap:8px}
+
+.bonus-bar{padding:10px 16px 4px}
+.bonus-lbl{font-family:'Fredoka',sans-serif;font-size:11px;font-weight:600;color:var(--text-light);text-align:center;margin-bottom:4px;letter-spacing:.5px;text-transform:uppercase}
+.bonus-wrap{position:relative;height:34px;max-width:340px;margin:0 auto}
+.bonus-track{position:absolute;top:14px;left:10px;right:10px;height:5px;background:rgba(27,46,74,.06);border-radius:4px}
+.bonus-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--mint),var(--gold));transition:width .5s}
+.bonus-mk{position:absolute;transform:translateX(-50%);text-align:center;top:0}
+.bonus-dot{width:14px;height:14px;border-radius:50%;margin:6px auto 0;border:2.5px solid;transition:all .4s}
+.bonus-txt{font-family:'Fredoka',sans-serif;font-size:10px;font-weight:600;margin-top:2px}
+
+.grid-area{flex:1;display:flex;align-items:center;justify-content:center;padding:8px 14px;position:relative}
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;width:100%;max-width:340px}
+
+.cell{aspect-ratio:1;border-radius:16px;display:flex;align-items:center;justify-content:center;flex-direction:column;font-family:'Fredoka',sans-serif;font-weight:600;transition:transform .08s;cursor:pointer;border:2px solid}
+.cell:active{transform:scale(.92)}
+.cell.closed{background:linear-gradient(145deg,#FFF,#F3FBF7);border-color:rgba(62,207,160,.2);box-shadow:0 2px 8px rgba(27,46,74,.08)}
+.cell.closed:hover{border-color:rgba(62,207,160,.4)}
+.cell.closed .q{font-size:24px;font-weight:700;color:rgba(62,207,160,.3);animation:breathe 3s infinite}
+.cell.gem{background:linear-gradient(145deg,#DDFFF0,#C2F0DC);border-color:rgba(62,207,160,.4);animation:gemReveal .4s ease-out}
+.cell .gem-e{font-size:18px}
+.cell .gem-v{font-size:16px;font-weight:700;color:var(--gold-text);margin-top:-1px}
+.cell.exploded{background:linear-gradient(145deg,#FFE8EA,#FFD0D4);border-color:rgba(255,71,87,.4);animation:mineExplode .5s ease-out,shockwave .5s ease-out}
+.cell.exploded .boom{font-size:24px}
+.cell.shielded{background:rgba(62,207,160,.08);border-color:rgba(62,207,160,.2);opacity:.5}
+.cell.shielded .safe-lbl{font-size:9px;color:var(--mint-deep);letter-spacing:1px;font-weight:700}
+.cell.rv-mine{background:rgba(255,71,87,.08);border-color:rgba(255,71,87,.2)}
+.cell.rv-gem{background:rgba(62,207,160,.08);border-color:rgba(62,207,160,.18);opacity:.7}
+.cell.rv-gem .gem-v{color:var(--rv-gem-text);font-size:14px}
+
+.float-bonus{position:absolute;z-index:43;pointer-events:none;font-family:'Fredoka',sans-serif;font-size:22px;font-weight:700;color:var(--gold-dark);text-shadow:0 2px 8px rgba(255,184,0,.4);animation:floatUp 1.3s ease-out forwards}
+
+.bottom{padding:6px 16px 20px}
+.hint{text-align:center;font-size:13px;color:var(--text-mid);margin-bottom:10px;font-weight:700;min-height:20px}
+.hint.bonus-h{color:var(--gold-dark);animation:bonusFlash 1s}
+
+.btn{width:100%;padding:16px;border:none;border-radius:18px;font-family:'Fredoka',sans-serif;font-size:17px;font-weight:700;cursor:pointer;position:relative;overflow:hidden;letter-spacing:.3px}
+.btn:active{transform:scale(.96)}
+.btn::after{content:'';position:absolute;top:0;width:40%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent);transform:skewX(-20deg)}
+.btn-cash{background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:#5C3D00;box-shadow:0 4px 20px rgba(255,184,0,.3)}
+.btn-cash::after{animation:btnShine 3s infinite}
+.btn-cash.off{background:rgba(27,46,74,.06);color:var(--text-light);cursor:not-allowed;box-shadow:none}
+.btn-cash.off::after{display:none}
+.btn-play{background:linear-gradient(135deg,var(--mint),var(--mint-deep));color:#fff;box-shadow:0 4px 20px rgba(62,207,160,.25)}
+.btn-play::after{animation:btnShine 3s infinite}
+.btn-cont{background:linear-gradient(135deg,#448AFF,#2962FF);color:#fff}
+.btn-ad{background:linear-gradient(135deg,var(--cyan),#448AFF);color:#fff}
+.btn-skip{background:rgba(27,46,74,.06);color:var(--text-mid);border:1.5px solid rgba(27,46,74,.1)}
+
+.ov{position:absolute;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;text-align:center;background:rgba(240,250,245,.92);backdrop-filter:blur(16px);animation:overlayIn .4s ease-out}
+.ov-emoji{font-size:68px;margin-bottom:14px;animation:rewardBounce .6s ease-out}
+.ov-title{font-family:'Fredoka',sans-serif;font-weight:700;margin-bottom:6px}
+.ov-sub{font-size:14px;color:var(--text-mid);line-height:1.6;max-width:280px;margin-bottom:16px}
+.ov-reward{font-family:'Fredoka',sans-serif;font-size:52px;font-weight:700;color:var(--gold-dark);margin:12px 0;animation:rewardBounce .6s ease-out .1s both}
+.ov-detail{font-size:13px;color:var(--text-mid);margin-bottom:22px}
+.ov-actions{display:flex;gap:10px;width:100%;max-width:300px}
+.ov-actions .btn{flex:1;font-size:14px;padding:14px 8px}
+
+.welcome-box{background:var(--bg-card);border-radius:20px;padding:18px 20px;text-align:left;margin-bottom:20px;width:100%;max-width:300px;border:1.5px solid rgba(62,207,160,.15)}
+.w-title{font-family:'Fredoka',sans-serif;font-size:15px;font-weight:600;color:var(--mint-deep);margin-bottom:12px}
+.w-rule{font-size:13px;color:var(--text-mid);line-height:1.4;padding:6px 0;display:flex;align-items:flex-start;gap:10px}
+
+.ad-ov{position:absolute;inset:0;z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(27,46,74,.95);font-family:'Fredoka',sans-serif}
+.ad-lbl{font-size:11px;color:rgba(255,255,255,.3);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px}
+.ad-txt{font-size:18px;color:#fff;margin-bottom:16px}
+.ad-bar{width:200px;height:5px;border-radius:4px;background:rgba(255,255,255,.1);overflow:hidden}
+.ad-fill{height:100%;border-radius:4px;width:100%;background:linear-gradient(90deg,var(--mint),var(--gold))}
+
+.confetti{position:absolute;pointer-events:none;z-index:55;border-radius:2px;animation:confettiDrop 1.5s ease-in forwards}
+.fx-layer{position:absolute;inset:0;z-index:42;pointer-events:none;overflow:hidden}
+.screen-glow{position:absolute;inset:0;animation:screenGlow var(--dur,.8s) ease-out forwards}
+.ring{position:absolute;top:50%;left:50%;width:80px;height:80px;border-radius:50%;animation:ringExpand var(--dur,.9s) ease-out forwards;animation-delay:var(--dly,0s)}
+.mega-txt{position:absolute;top:48%;left:50%;font-family:'Fredoka',sans-serif;font-weight:700;white-space:nowrap;animation:megaText 1.4s ease-out forwards}
+.edge-glow{position:absolute;animation:edgePulse 1s ease-out forwards}
+.edge-glow.top{top:0;left:0;right:0;height:60px}
+.edge-glow.bottom{bottom:0;left:0;right:0;height:60px}
+.burst-particle{position:absolute;top:50%;left:50%;width:8px;height:8px;border-radius:50%;animation:particleFly var(--dur,.9s) ease-out forwards;animation-delay:var(--dly,0s)}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div class="root" id="root">
+  <div class="header">
+    <div class="h-left"><div class="h-icon">💎</div><span class="h-name">Mines</span></div>
+    <div class="ticket-pill">🎟️ <span id="tickets">0</span></div>
+  </div>
+  <div class="info">
+    <div class="col-display">
+      <span class="col-label">Tickets</span>
+      <span class="col-num" id="collected">0</span>
+      <span class="col-unit">pcs</span>
+    </div>
+    <div class="info-right">
+      <div class="shield-pill on" id="shieldPill">🛡️ ×1</div>
+      <span class="gem-cnt hidden" id="gemCnt"></span>
+    </div>
+  </div>
+  <div class="bonus-bar">
+    <div class="bonus-lbl">STREAK BONUS</div>
+    <div class="bonus-wrap">
+      <div class="bonus-track"><div class="bonus-fill" id="bonusFill" style="width:0%"></div></div>
+      <div class="bonus-mk" style="left:25%"><div class="bonus-dot" id="bd5"></div><div class="bonus-txt" id="bt5">+2</div></div>
+      <div class="bonus-mk" style="left:50%"><div class="bonus-dot" id="bd10"></div><div class="bonus-txt" id="bt10">+5</div></div>
+      <div class="bonus-mk" style="left:75%"><div class="bonus-dot" id="bd15"></div><div class="bonus-txt" id="bt15">+10</div></div>
+      <div class="bonus-mk" style="left:100%"><div class="bonus-dot" id="bd20"></div><div class="bonus-txt" id="bt20">+30</div></div>
+    </div>
+  </div>
+  <div class="grid-area" id="gridArea">
+    <div class="grid" id="grid"></div>
+  </div>
+  <div class="bottom">
+    <div class="hint" id="hint">💎 Tap any tile to start!</div>
+    <button class="btn btn-cash off" id="mainBtn" disabled>💰 Cash Out</button>
+  </div>
+  <div class="fx-layer hidden" id="fxLayer"></div>
+  <div id="confettiLayer"></div>
+
+  <!-- Welcome Overlay -->
+  <div class="ov" id="ovWelcome">
+    <div class="ov-emoji" style="font-size:56px">💎</div>
+    <div class="ov-title" style="font-size:34px;color:var(--mint-deep)">MINES</div>
+    <div class="ov-sub" style="margin-bottom:8px">Tap gems. Avoid bombs. Cash out!</div>
+    <div class="welcome-box">
+      <div class="w-title">🎯 How to Play</div>
+      <div class="w-rule"><span>💎</span><span>Tap a tile — gem = earn tickets!</span></div>
+      <div class="w-rule"><span>💣</span><span>Mine = watch ad to continue or get 1 ticket</span></div>
+      <div class="w-rule"><span>🛡️</span><span>Shield: continue once per game!</span></div>
+      <div class="w-rule"><span>🎁</span><span>Streak bonuses for consecutive gems!</span></div>
+      <div class="w-rule"><span>💰</span><span>Cash Out → watch ad → tickets confirmed!</span></div>
+    </div>
+    <button class="btn btn-play" onclick="startGame()" style="max-width:300px">SUGOD NA! 💎</button>
+  </div>
+
+  <!-- Shield Overlay -->
+  <div class="ov hidden" id="ovShield">
+    <div class="ov-emoji">💣</div>
+    <div class="ov-title" style="font-size:28px;color:var(--red)">MINE HIT!</div>
+    <div class="ov-sub" id="shieldMsg"></div>
+    <div class="ov-actions">
+      <button class="btn btn-ad" onclick="useShield()">🛡️ Continue</button>
+      <button class="btn btn-skip" onclick="acceptDeath()">❌ Skip</button>
+    </div>
+  </div>
+
+  <!-- Result Overlay -->
+  <div class="ov hidden" id="ovResult">
+    <div class="ov-emoji" id="resEmoji"></div>
+    <div class="ov-title" id="resTitle"></div>
+    <div class="ov-sub" id="resSub"></div>
+    <div class="ov-reward" id="resReward"></div>
+    <div class="ov-detail" id="resDetail"></div>
+    <button class="btn btn-play" onclick="startGame()" style="max-width:300px">Play Again! 💎</button>
+  </div>
+
+  <!-- Consolation Overlay -->
+  <div class="ov hidden" id="ovConsolation">
+    <div class="ov-emoji">😅</div>
+    <div class="ov-title" style="font-size:34px;color:var(--red)">SAYANG!</div>
+    <div class="ov-sub" id="conSub"></div>
+    <div class="ov-reward">+1 🎟️</div>
+    <div class="ov-detail">Consolation ticket!</div>
+    <button class="btn btn-play" onclick="startGame()" style="max-width:300px">Try Again! 💎</button>
+  </div>
+
+  <!-- Ad Overlay -->
+  <div class="ad-ov hidden" id="ovAd">
+    <div class="ad-lbl">REWARDED AD</div>
+    <div class="ad-txt">🎬 Watching Ad...</div>
+    <div class="ad-bar"><div class="ad-fill"></div></div>
+  </div>
+</div>
+
+<script>
+const POOL=[1,1,1,1,1,1,1,1,2,2,2,2,2,3,3,3,5,5,7,10];
+const TOTAL=25,MINE_COUNT=5,GEMS_COUNT=20;
+const BONUS_TABLE=[{at:5,bonus:2},{at:10,bonus:5},{at:15,bonus:10},{at:20,bonus:30}];
+
+let board=[],revealed=[],phase='ready',collected=0,gemsOpened=0;
+let shieldUsed=false,shieldIdx=-1,hitIdx=-1,tickets=0;
+let boardRevealed=false,pendingAction=null;
+
+const $=id=>document.getElementById(id);
+const grid=$('grid'),hint=$('hint'),mainBtn=$('mainBtn');
+
+function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]]}return b}
+function makeBoard(){const t=shuffle(POOL),c=[];for(let i=0;i<GEMS_COUNT;i++)c.push({type:'gem',tk:t[i]});for(let i=0;i<MINE_COUNT;i++)c.push({type:'mine',tk:0});return shuffle(c)}
+
+function renderGrid(){
+  grid.innerHTML='';
+  board.forEach((_,i)=>{
+    const d=document.createElement('div');
+    d.className='cell closed';d.dataset.idx=i;
+    d.innerHTML='<span class="q">?</span>';
+    d.onclick=()=>onTap(i);
+    grid.appendChild(d);
+  });
+}
+
+function updateCell(i){
+  const el=grid.children[i],cell=board[i];
+  const isRv=revealed[i],isSh=i===shieldIdx,isHit=i===hitIdx&&isRv&&cell.type==='mine'&&!isSh;
+  el.onclick=null;
+  if(boardRevealed&&!isRv&&!isSh&&!isHit){
+    if(cell.type==='mine'){el.className='cell rv-mine';el.innerHTML='<span style="font-size:18px">💣</span>';}
+    else{el.className='cell rv-gem';el.innerHTML=`<span class="gem-e">💎</span><span class="gem-v">+${cell.tk}</span>`;}
+  }else if(isRv&&cell.type==='gem'){
+    el.className='cell gem';el.innerHTML=`<span class="gem-e">💎</span><span class="gem-v">+${cell.tk}</span>`;
+  }else if(isSh){
+    el.className='cell shielded';el.innerHTML='<span style="font-size:16px">💣</span><span class="safe-lbl">SAFE</span>';
+  }else if(isRv&&cell.type==='mine'){
+    el.className='cell exploded';el.innerHTML='<span class="boom">💥</span>';
+  }
+}
+
+function updateUI(){
+  $('collected').textContent=collected;
+  $('tickets').textContent=tickets;
+  const gc=$('gemCnt');
+  if(gemsOpened>0){gc.classList.remove('hidden');gc.textContent=`${gemsOpened}/${GEMS_COUNT}`;}else gc.classList.add('hidden');
+  $('bonusFill').style.width=Math.min(100,gemsOpened/20*100)+'%';
+  [{id:5,at:5},{id:10,at:10},{id:15,at:15},{id:20,at:20}].forEach(m=>{
+    const dot=$('bd'+m.id),txt=$('bt'+m.id);
+    if(gemsOpened>=m.at){dot.style.background='var(--mint)';dot.style.borderColor='var(--mint-deep)';txt.style.color='var(--mint-deep)';}
+    else if(gemsOpened>=m.at-3){dot.style.background='var(--gold-light)';dot.style.borderColor='var(--gold)';txt.style.color='var(--gold-dark)';}
+    else{dot.style.background='rgba(27,46,74,.04)';dot.style.borderColor='rgba(27,46,74,.1)';txt.style.color='var(--text-light)';}
+  });
+  const sp=$('shieldPill');sp.className=shieldUsed?'shield-pill off':'shield-pill on';sp.textContent=shieldUsed?'🛡️ Used':'🛡️ ×1';
+  const lb=BONUS_TABLE.find(b=>b.at===gemsOpened);
+  if(lb){hint.className='hint bonus-h';hint.textContent=`🎉 ${gemsOpened} gems — +${lb.bonus} bonus!`;}
+  else{hint.className='hint';
+    if(phase==='ready')hint.textContent='💎 Tap any tile to start!';
+    else if(phase==='playing')hint.textContent=collected===0?'💎 Find the gems!':`${collected} tickets — Cash Out or keep going?`;
+    else if(phase==='board-reveal')hint.textContent=boardRevealed?'Board revealed!':'';
+  }
+  if(phase==='board-reveal'&&pendingAction){
+    mainBtn.className=shieldUsed?'btn btn-ad':'btn btn-cont';
+    mainBtn.textContent=shieldUsed?'📺 Watch Ad for +1 Ticket':'Tap to continue →';
+    mainBtn.disabled=false;mainBtn.onclick=pendingAction;
+  }else if(phase==='done'){
+    mainBtn.className='btn btn-play';mainBtn.textContent='Play Again! 💎';mainBtn.disabled=false;mainBtn.onclick=startGame;
+  }else{
+    const canCash=phase==='playing'&&collected>0;
+    mainBtn.className=canCash?'btn btn-cash':'btn btn-cash off';
+    mainBtn.textContent=collected>0?`💰 Cash Out (${collected} tickets)`:'💰 Cash Out';
+    mainBtn.disabled=!canCash;mainBtn.onclick=cashOut;
+  }
+}
+
+function showOverlay(id){document.querySelectorAll('.ov,.ad-ov').forEach(o=>o.classList.add('hidden'));if(id)$(id).classList.remove('hidden');}
+function showAd(cb){showOverlay('ovAd');setTimeout(()=>{showOverlay(null);cb();},1500);}
+function spawnConfetti(n=20){
+  const colors=['#FFB800','#3ECFA0','#00D2FF','#A855F7','#FF4757','#FF6B81','#FFE082'];
+  const layer=$('confettiLayer');layer.innerHTML='';
+  for(let i=0;i<n;i++){const d=document.createElement('div');d.className='confetti';
+    d.style.cssText=`left:${Math.random()*100}%;top:-10px;width:${6+Math.random()*6}px;height:${6+Math.random()*6}px;background:${colors[Math.floor(Math.random()*colors.length)]};animation-delay:${Math.random()*.6}s;border-radius:${Math.random()>.5?'50%':'2px'}`;
+    layer.appendChild(d);}
+  setTimeout(()=>layer.innerHTML='',2000);
+}
+function doShake(){grid.style.animation='shake .6s';setTimeout(()=>grid.style.animation='',600);}
+function doZoom(){const r=$('root');r.classList.add('zoom');setTimeout(()=>r.classList.remove('zoom'),400);}
+function triggerScreenFx(type,opts={}){
+  const fx=$('fxLayer');fx.classList.remove('hidden');fx.innerHTML='';
+  if(type==='red'){fx.innerHTML=`<div class="screen-glow" style="background:radial-gradient(circle at 50% 50%,rgba(255,71,87,.4),transparent 70%);--dur:.6s"></div><div class="edge-glow top" style="background:linear-gradient(180deg,rgba(255,71,87,.35),transparent)"></div><div class="edge-glow bottom" style="background:linear-gradient(0deg,rgba(255,71,87,.35),transparent)"></div>`;setTimeout(()=>fx.classList.add('hidden'),700);}
+  else if(type==='bonus'){
+    const{at}=opts;let glow,rings='',edges='',particles='',mega='',dur=1200;
+    const pC=['#FFB800','#3ECFA0','#00D2FF','#FFE082','#A855F7'];
+    if(at===5){glow='rgba(255,184,0,.35)';mega=`<div class="mega-txt" style="font-size:30px;color:var(--gold-dark)">+2 BONUS!</div>`;
+      edges='<div class="edge-glow top" style="background:linear-gradient(180deg,rgba(255,184,0,.3),transparent)"></div><div class="edge-glow bottom" style="background:linear-gradient(0deg,rgba(255,184,0,.3),transparent)"></div>';
+      for(let i=0;i<8;i++){const a=Math.PI*2/8*i;particles+=`<div class="burst-particle" style="background:${pC[i%5]};--px:${Math.cos(a)*120}px;--py:${Math.sin(a)*120}px;--dur:.7s;--dly:${i*.03}s"></div>`;}
+    }else if(at===10){glow='rgba(255,184,0,.45)';dur=1400;mega=`<div class="mega-txt" style="font-size:34px;color:var(--mint-deep)">+5 BONUS!</div>`;
+      rings=`<div class="ring" style="border:4px solid var(--gold);--dur:.9s;--dly:0s"></div><div class="ring" style="border:3px solid var(--mint);--dur:.9s;--dly:.12s"></div>`;
+      edges='<div class="edge-glow top" style="background:linear-gradient(180deg,rgba(62,207,160,.3),transparent)"></div><div class="edge-glow bottom" style="background:linear-gradient(0deg,rgba(62,207,160,.3),transparent)"></div>';
+      for(let i=0;i<14;i++){const a=Math.PI*2/14*i;particles+=`<div class="burst-particle" style="background:${pC[i%5]};--px:${Math.cos(a)*150}px;--py:${Math.sin(a)*150}px;--dur:.9s;--dly:${i*.025}s"></div>`;}
+    }else if(at===15){glow='rgba(255,184,0,.5)';dur=1600;mega=`<div class="mega-txt" style="font-size:38px;color:var(--gold-dark)">+10 BONUS!</div>`;
+      rings=`<div class="ring" style="border:5px solid var(--gold);--dur:1s;--dly:0s"></div><div class="ring" style="border:3px solid var(--cyan);--dur:1s;--dly:.1s"></div><div class="ring" style="border:2px solid var(--purple);--dur:1s;--dly:.2s"></div>`;
+      edges='<div class="edge-glow top" style="background:linear-gradient(180deg,rgba(255,184,0,.4),transparent)"></div><div class="edge-glow bottom" style="background:linear-gradient(0deg,rgba(0,210,255,.3),transparent)"></div>';
+      for(let i=0;i<20;i++){const a=Math.PI*2/20*i,d=130+Math.random()*60;particles+=`<div class="burst-particle" style="background:${pC[i%5]};--px:${Math.cos(a)*d}px;--py:${Math.sin(a)*d}px;--dur:1s;--dly:${i*.02}s"></div>`;}
+    }else if(at===20){glow='rgba(255,184,0,.4)';dur=2000;mega=`<div class="mega-txt" style="font-size:42px;color:#fff">PERFECT +30!</div>`;
+      rings=`<div class="ring" style="border:6px solid var(--gold);--dur:1.2s;--dly:0s"></div><div class="ring" style="border:4px solid var(--mint);--dur:1.2s;--dly:.08s"></div><div class="ring" style="border:3px solid var(--cyan);--dur:1.2s;--dly:.16s"></div><div class="ring" style="border:2px solid var(--purple);--dur:1.2s;--dly:.24s"></div>`;
+      edges='<div class="edge-glow top" style="background:linear-gradient(180deg,rgba(255,184,0,.5),transparent)"></div><div class="edge-glow bottom" style="background:linear-gradient(0deg,rgba(168,85,247,.4),transparent)"></div>';
+      for(let i=0;i<30;i++){const a=Math.PI*2/30*i,d=110+Math.random()*80;particles+=`<div class="burst-particle" style="background:${pC[i%5]};--px:${Math.cos(a)*d}px;--py:${Math.sin(a)*d}px;--dur:1.1s;--dly:${i*.015}s"></div>`;}
+    }
+    fx.innerHTML=`<div class="screen-glow" style="background:radial-gradient(circle at 50% 50%,${glow},transparent 70%);--dur:${dur/1000}s"></div>${rings}${edges}${particles}${mega}`;
+    doZoom();setTimeout(()=>fx.classList.add('hidden'),dur);
+  }
+}
+function addFloatBonus(text){
+  const ga=$('gridArea'),d=document.createElement('div');
+  d.className='float-bonus';d.style.cssText='top:40%;left:50%';d.textContent=text;
+  ga.appendChild(d);setTimeout(()=>d.remove(),1300);
+}
+
+function onTap(idx){
+  if(phase!=='ready'&&phase!=='playing')return;
+  if(revealed[idx])return;
+  if(phase==='ready')phase='playing';
+  revealed[idx]=true;updateCell(idx);
+  const cell=board[idx];
+  if(cell.type==='gem'){
+    const ng=gemsOpened+1;let nc=collected+cell.tk;
+    const bi=BONUS_TABLE.find(b=>b.at===ng);
+    if(bi){nc+=bi.bonus;addFloatBonus(`+${bi.bonus} BONUS!`);spawnConfetti(bi.at===20?40:bi.at>=15?25:15);triggerScreenFx('bonus',{at:bi.at});}
+    collected=nc;gemsOpened=ng;updateUI();
+    if(ng>=GEMS_COUNT)setTimeout(()=>doCashOut(true,nc,ng),800);
+  }else{
+    hitIdx=idx;phase='mine-hit';doShake();triggerScreenFx('red');
+    if(!shieldUsed){
+      setTimeout(()=>{
+        phase='shield-prompt';
+        $('shieldMsg').innerHTML=collected>0?`You hit a mine! 😱<br>Your <strong style="color:var(--gold-dark)">${collected} tickets</strong> are at risk!<br><br>🛡️ Watch ad to continue?<br>❌ Or get 1 consolation ticket`:'Hit a mine on the first try! 😱<br><br>🛡️ Watch ad to continue?<br>❌ Or get 1 consolation ticket';
+        showOverlay('ovShield');
+      },800);
+    }else{
+      phase='board-reveal';
+      setTimeout(()=>{boardRevealed=true;for(let i=0;i<TOTAL;i++)updateCell(i);
+        pendingAction=()=>showAd(()=>{tickets+=1;collected=0;
+          $('conSub').textContent=gemsOpened>0?`${gemsOpened} gems found, but hit a mine...`:'Better luck next time!';
+          phase='done';showOverlay('ovConsolation');updateUI();});
+        updateUI();
+      },500);
+    }
+  }
+}
+
+function useShield(){showOverlay(null);showAd(()=>{shieldUsed=true;shieldIdx=hitIdx;updateCell(hitIdx);phase='playing';updateUI();});}
+function acceptDeath(){showOverlay(null);phase='board-reveal';
+  setTimeout(()=>{boardRevealed=true;for(let i=0;i<TOTAL;i++)updateCell(i);
+    pendingAction=()=>showAd(()=>{tickets+=1;collected=0;
+      $('conSub').textContent=gemsOpened>0?`${gemsOpened} gems found, but hit a mine...`:'Better luck next time!';
+      phase='done';showOverlay('ovConsolation');updateUI();});
+    updateUI();
+  },150);
+}
+function doCashOut(perfect,amt,gems){
+  phase='board-reveal';boardRevealed=true;for(let i=0;i<TOTAL;i++)updateCell(i);
+  pendingAction=()=>showAd(()=>{
+    tickets+=amt;spawnConfetti(30);
+    let e='💰',t='NICE!',tc='var(--mint-deep)',s=`${gems} gems found`,d='Safely cashed out!';
+    if(perfect){e='🏆';t='PERFECT!';tc='var(--gold-dark)';s='All gems discovered!';d=`All ${gems} gems cleared!`;}
+    else if(amt>=20){e='🤑';t='JACKPOT!';tc='var(--gold-dark)';s=`${gems} gems — malaking panalo!`;d='Massive haul!';}
+    else if(amt>=10){e='🔥';t='MAGALING!';tc='var(--mint-deep)';s=`${gems} gems found`;d='Great judgment!';}
+    $('resEmoji').textContent=e;$('resEmoji').style.fontSize='68px';
+    $('resTitle').textContent=t;$('resTitle').style.cssText=`font-size:34px;color:${tc}`;
+    $('resSub').textContent=s;$('resReward').textContent=`+${amt} 🎟️`;$('resDetail').textContent=d;
+    collected=0;phase='done';showOverlay('ovResult');updateUI();
+  });updateUI();
+}
+function cashOut(){if(phase!=='playing'||collected<=0)return;doCashOut(false,collected,gemsOpened);}
+
+function startGame(){
+  board=makeBoard();revealed=Array(TOTAL).fill(false);
+  collected=0;gemsOpened=0;shieldUsed=false;shieldIdx=-1;hitIdx=-1;
+  phase='ready';boardRevealed=false;pendingAction=null;
+  showOverlay(null);renderGrid();updateUI();
+}
+</script>
+</body>
+</html>

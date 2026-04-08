@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Bato Bato Pick — StepPot</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700;800;900&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:#e8f5f0;color:#1a3a2f;min-height:100vh;overflow:hidden;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none}
+.app{width:100%;max-width:420px;margin:0 auto;height:100vh;display:flex;flex-direction:column;position:relative;overflow:hidden;background:linear-gradient(175deg,#eaf7f2,#f5fcf8 40%,#e0f2ec)}
+.bgflash{position:absolute;inset:0;pointer-events:none;z-index:1}
+/* HUD */
+.hud{padding:10px 14px;display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.85);border-bottom:1px solid rgba(0,180,130,.12);flex-shrink:0;z-index:10;backdrop-filter:blur(10px)}
+.hud-left{display:flex;align-items:center;gap:8px}
+.hud-ico{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#00bfa5,#009688);display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 6px rgba(0,191,165,.3)}
+.hud-title{font-family:'DM Sans',sans-serif;font-size:16px;font-weight:800;color:#1a3a2f}
+.hud-score{font-size:20px;font-weight:900;color:#e8a800;line-height:1}.hud-score-lbl{font-size:8px;color:#6b9b8a;letter-spacing:1px}
+.hud-tk{display:flex;align-items:center;gap:4px;background:rgba(0,191,165,.08);border:1.5px solid rgba(0,191,165,.15);border-radius:18px;padding:4px 10px}
+.hud-tk-n{font-size:14px;font-weight:800;color:#009688}.hud-tk-lbl{font-size:8px;color:#6b9b8a;font-weight:700}
+/* Round bar */
+.rbar{padding:6px 16px;display:flex;gap:4px;justify-content:center;align-items:center;flex-shrink:0;background:rgba(0,180,130,.04);z-index:2}
+.rdot{width:24px;height:6px;border-radius:99px;background:rgba(0,150,110,.1);transition:all .3s}
+.rdot.win{background:#00c853}.rdot.lose{background:#ff4757}.rdot.draw{background:#e8a800}.rdot.cur{background:rgba(0,150,110,.2);animation:pulse 1s infinite}
+/* Battle */
+.battle{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;padding:12px;z-index:2}
+.battle.shake{animation:shake .4s ease}
+.hand-label{font-size:12px;font-weight:700;color:#6b9b8a;letter-spacing:1px}
+.hand{font-size:76px;line-height:1;filter:drop-shadow(0 4px 12px rgba(0,0,0,.15));transition:all .2s}
+.hand.pump{animation:handPump .9s ease}
+.hand.reveal{animation:revealSlam .4s ease}
+.hand.winglow{animation:winGlow .8s ease}
+.hand.loseshake{animation:loseShake .5s ease}
+.vs{font-size:28px;font-weight:900;color:#e8a800;text-shadow:0 0 12px rgba(232,168,0,.3);margin:10px 0}
+/* Choices */
+.choices{padding:12px 16px 24px;flex-shrink:0;z-index:2}
+.choices-hint{text-align:center;font-size:13px;color:#6b9b8a;margin-bottom:10px;font-weight:600}
+.choices-row{display:flex;gap:10px;justify-content:center}
+.choice-btn{flex:1;max-width:110px;aspect-ratio:1;border-radius:20px;border:2px solid rgba(0,150,110,.15);background:rgba(255,255,255,.7);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.choice-btn:active{transform:scale(.9)}
+.choice-btn.sel{border-color:#00bfa5;background:rgba(0,191,165,.12);box-shadow:0 0 16px rgba(0,191,165,.2)}
+.choice-btn.dis{opacity:.3;cursor:not-allowed}
+.choice-btn span{font-size:44px;pointer-events:none}
+.choice-btn small{font-size:11px;font-weight:700;color:#6b9b8a;pointer-events:none}
+/* Floating */
+.float-fx{position:absolute;pointer-events:none;z-index:60;animation:scoreFloat 1.2s ease forwards}
+.round-result{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:40px;font-weight:900;pointer-events:none;z-index:50;text-shadow:0 3px 10px rgba(0,0,0,.7);animation:scoreFloat 1.4s ease forwards}
+.score-pop{position:absolute;left:50%;top:25%;transform:translateX(-50%);font-size:24px;font-weight:900;pointer-events:none;z-index:55;animation:scoreFloat 1s ease forwards}
+/* Overlays */
+.ov{position:fixed;inset:0;z-index:200;background:rgba(230,245,240,.96);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:20px}
+.ov.hidden{display:none}
+.ov-box{background:#fff;border:1.5px solid rgba(0,180,130,.12);border-radius:24px;padding:28px 24px;text-align:center;width:100%;max-width:340;animation:slideIn .3s ease;max-height:90vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.08)}
+.ov-emoji{font-size:56px;margin-bottom:8px;animation:popIn .4s ease}
+.ov-title{font-size:24px;font-weight:900;color:#009688;margin-bottom:6px}
+.ov-desc{font-size:13px;color:#6b9b8a;line-height:1.7;margin-bottom:16px;white-space:pre-line}
+.score-rules{background:rgba(0,150,110,.05);border-radius:12px;padding:12px;margin-bottom:16px}
+.score-rules-t{font-size:11px;color:#6b9b8a;margin-bottom:6px;font-weight:700}
+.score-rules-row{display:flex;justify-content:space-around;font-size:13px}
+.sr-item{text-align:center}.sr-val{font-weight:900;font-size:18px}.sr-lbl{font-size:10px;color:#6b9b8a}
+.ov-btn{width:100%;padding:15px;font-size:16px;font-weight:900;background:linear-gradient(135deg,#00bfa5,#009688);color:#fff;border:none;border-radius:14px;cursor:pointer;margin-bottom:8px;font-family:'DM Sans',sans-serif;box-shadow:0 3px 14px rgba(0,191,165,.25)}
+.ov-btn:active{transform:scale(.95)}
+.ov-btn:disabled{background:#ccc;color:#999;cursor:not-allowed;animation:none;box-shadow:none}
+.ov-btn-ghost{width:100%;padding:12px;font-size:13px;font-weight:700;background:transparent;color:#6b9b8a;border:1.5px solid rgba(0,150,110,.15);border-radius:12px;cursor:pointer;font-family:'DM Sans',sans-serif}
+.ov-note{font-size:11px;color:#6b9b8a;margin-top:8px;font-weight:600}
+.ov-note2{font-size:10px;color:#446655;margin-top:4px}
+/* Stats */
+.stats{background:rgba(0,150,110,.05);border-radius:12px;padding:10px 14px;margin-bottom:14px}
+.stat-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(0,150,110,.08)}
+.stat-row:last-child{border-bottom:none}
+.stat-lbl{font-size:12px;color:#6b9b8a}.stat-val{font-size:13px;font-weight:700}
+/* Reward */
+.reward-pill{background:linear-gradient(135deg,#e8a800,#f5c542);border-radius:16px;padding:14px 28px;margin:12px 0 16px;display:inline-block;box-shadow:0 3px 12px rgba(232,168,0,.2)}
+.reward-n{font-size:44px;font-weight:900;color:#fff}.reward-lbl{font-size:11px;color:rgba(120,75,0,.6);font-weight:700}
+/* Confetti */
+.confetti{position:fixed;pointer-events:none;z-index:300;top:-10px}
+/* Ad */
+.ad-ov{position:fixed;inset:0;z-index:250;background:rgba(0,0,0,.85);display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ad-ov.hidden{display:none}
+
+@keyframes popIn{0%{transform:scale(0);opacity:0}60%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
+@keyframes slideIn{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes glow{0%,100%{box-shadow:0 0 12px #00ff8888}50%{box-shadow:0 0 28px #00ff88cc,0 0 50px #00ff8844}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+@keyframes confettiFall{0%{transform:translateY(0) rotate(0);opacity:1}100%{transform:translateY(120vh) rotate(720deg);opacity:0}}
+@keyframes scoreFloat{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-50px) scale(1.3);opacity:0}}
+@keyframes handPump{0%{transform:translateY(0) scale(1)}10%{transform:translateY(-30px) scale(1.1)}20%{transform:translateY(5px) scale(.95)}35%{transform:translateY(-35px) scale(1.15)}50%{transform:translateY(5px) scale(.95)}65%{transform:translateY(-40px) scale(1.2)}80%{transform:translateY(5px) scale(.95)}100%{transform:translateY(0) scale(1)}}
+@keyframes revealSlam{0%{transform:scale(0) rotate(-20deg);opacity:0}50%{transform:scale(1.4) rotate(5deg);opacity:1}70%{transform:scale(.9) rotate(-2deg)}100%{transform:scale(1) rotate(0);opacity:1}}
+@keyframes winGlow{0%{filter:drop-shadow(0 0 0 transparent)}50%{filter:drop-shadow(0 0 30px #00e87a) drop-shadow(0 0 60px #00e87a66)}100%{filter:drop-shadow(0 0 8px #00e87a44)}}
+@keyframes loseShake{0%{transform:translateX(0)}15%{transform:translateX(-10px) rotate(-5deg)}30%{transform:translateX(10px) rotate(5deg)}45%{transform:translateX(-8px) rotate(-3deg)}60%{transform:translateX(8px) rotate(3deg)}80%{transform:translateX(-4px)}100%{transform:translateX(0) scale(.9)}}
+@keyframes bgFlashGreen{0%{background:rgba(0,232,122,.2)}100%{background:transparent}}
+@keyframes bgFlashRed{0%{background:rgba(255,71,87,.2)}100%{background:transparent}}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+<div class="bgflash" id="bgflash"></div>
+
+<div class="hud">
+  <div class="hud-left"><div class="hud-ico">🤜</div><span class="hud-title">Bato Bato Pick</span></div>
+  <div class="hud-tk">🎟️ <span class="hud-tk-n" id="hudTk">0</span></div>
+</div>
+
+<div class="rbar" id="rbar"></div>
+
+<div class="battle" id="battle">
+  <div class="hand-label">OPPONENT</div>
+  <div class="hand" id="oppHand">✊</div>
+  <div class="vs" id="vsBadge">VS</div>
+  <div class="hand" id="myHand">✊</div>
+  <div class="hand-label">YOU</div>
+</div>
+
+<div class="choices" id="choicesArea" style="display:none">
+  <div class="choices-hint" id="choicesHint"></div>
+  <div class="choices-row">
+    <button class="choice-btn" data-c="rock" onclick="pick('rock')"><span>✊</span><small>ROCK</small></button>
+    <button class="choice-btn" data-c="scissors" onclick="pick('scissors')"><span>✌️</span><small>SCISSORS</small></button>
+    <button class="choice-btn" data-c="paper" onclick="pick('paper')"><span>🖐️</span><small>PAPER</small></button>
+  </div>
+</div>
+
+<!-- Start -->
+<div class="ov" id="ovStart">
+  <div class="ov-box">
+    <div class="ov-emoji">🤜🤛</div>
+    <div class="ov-title">Bato Bato Pick!</div>
+    <div class="ov-desc">7 rounds of Bato-Bato-Pick!
+Win = 3 tickets per round! 🎟️</div>
+    <div class="score-rules"><div class="score-rules-t">Rewards</div>
+      <div class="score-rules-row">
+        <div class="sr-item"><div class="sr-val" style="color:#00e87a">+3 🎟️</div><div class="sr-lbl">WIN</div></div>
+        <div class="sr-item"><div class="sr-val" style="color:#ffc107">0</div><div class="sr-lbl">DRAW</div></div>
+        <div class="sr-item"><div class="sr-val" style="color:#ff4757">0</div><div class="sr-lbl">LOSE</div></div>
+      </div>
+    </div>
+    <button class="ov-btn" id="startBtn" onclick="startGame()">▶ Play Now!</button>
+    <div class="ov-note" id="startNote" style="font-size:11px;color:#88ccaa;margin-top:8px"></div>
+  </div>
+</div>
+
+<!-- Ad -->
+<div class="ad-ov hidden" id="ovAd">
+  <div style="color:#666;font-size:14px;margin-bottom:16px">📺 Advertisement</div>
+  <div style="color:#fff;font-size:48px;font-weight:900" id="adTimer">5</div>
+  <div style="color:#444;font-size:12px;margin-top:20px">Please wait...</div>
+</div>
+
+<!-- Result -->
+<div class="ov hidden" id="ovResult"><div class="ov-box" id="resultBox"></div></div>
+</div>
+
+<script>
+var ROUNDS=7,WIN_TK=3,MAX_PLAYS=3;
+var HANDS={rock:'✊',scissors:'✌️',paper:'🖐️'};
+
+var G={round:0,wins:0,losses:0,draws:0,tickets:0,results:[],animating:false,phase:'start',playsUsed:0,totalTk:0};
+
+function getWinner(p,o){if(p===o)return'draw';if((p==='rock'&&o==='scissors')||(p==='scissors'&&o==='paper')||(p==='paper'&&o==='rock'))return'win';return'lose'}
+function randChoice(){return['rock','scissors','paper'][Math.floor(Math.random()*3)]}
+
+function updateHUD(){
+  document.getElementById('hudTk').textContent=G.totalTk;
+  var left=MAX_PLAYS-G.playsUsed;
+  var btn=document.getElementById('startBtn');
+  var note=document.getElementById('startNote');
+  if(left<=0){btn.disabled=true;btn.textContent='No Plays Left';note.textContent='Tap again to reset (demo)';note.style.color='#ff4757';btn.onclick=function(){G.playsUsed=0;btn.disabled=false;btn.onclick=function(){startGame()};updateHUD();};}
+  else{btn.disabled=false;btn.textContent='▶ Play ('+left+'/'+MAX_PLAYS+')';note.textContent='';note.style.color='#88ccaa';btn.onclick=function(){startGame()};}
+}
+
+function renderRbar(){
+  var h='';for(var i=0;i<ROUNDS;i++){
+    var cls='rdot';
+    if(i<G.results.length)cls+=' '+G.results[i];
+    else if(i===G.results.length&&G.phase==='playing')cls+=' cur';
+    h+='<div class="'+cls+'"></div>';
+  }document.getElementById('rbar').innerHTML=h;
+}
+
+function showAd(cb){
+  document.getElementById('ovAd').classList.remove('hidden');
+  var t=5;document.getElementById('adTimer').textContent=t;
+  var iv=setInterval(function(){t--;document.getElementById('adTimer').textContent=t;
+    if(t<=0){clearInterval(iv);document.getElementById('ovAd').classList.add('hidden');cb();}
+  },1000);
+}
+
+function startGame(){
+  if(G.playsUsed>=MAX_PLAYS)return;
+  G.playsUsed++;G.round=0;G.wins=0;G.losses=0;G.draws=0;G.tickets=0;G.results=[];G.animating=false;G.phase='playing';
+  document.getElementById('myHand').textContent='✊';document.getElementById('oppHand').textContent='✊';
+  document.getElementById('myHand').className='hand';document.getElementById('oppHand').className='hand';
+  document.getElementById('vsBadge').textContent='VS';
+  document.getElementById('ovStart').classList.add('hidden');document.getElementById('ovResult').classList.add('hidden');
+  document.getElementById('choicesArea').style.display='';
+  updateHUD();renderRbar();updateChoicesHint();
+}
+
+function updateChoicesHint(){document.getElementById('choicesHint').textContent='Round '+(G.round+1)+'/7 — Pick one! 🤜';}
+
+function pick(pc){
+  if(G.animating||G.phase!=='playing')return;
+  G.animating=true;
+  document.querySelectorAll('.choice-btn').forEach(function(b){b.classList.remove('sel');b.classList.add('dis');if(b.dataset.c===pc)b.classList.add('sel')});
+  var oc=randChoice();
+  var my=document.getElementById('myHand'),op=document.getElementById('oppHand'),vs=document.getElementById('vsBadge');
+  my.textContent='✊';op.textContent='✊';my.className='hand pump';op.className='hand pump';vs.textContent='⚡';
+
+  setTimeout(function(){
+    my.className='hand reveal';op.className='hand reveal';
+    my.textContent=HANDS[pc];op.textContent=HANDS[oc];
+    var result=getWinner(pc,oc);
+    if(result==='win'){G.wins++;G.tickets+=WIN_TK;}
+    else if(result==='lose')G.losses++;
+    else G.draws++;
+    G.results.push(result);G.round++;
+    updateHUD();renderRbar();
+
+    setTimeout(function(){
+      var bf=document.getElementById('bgflash'),ba=document.getElementById('battle');
+      if(result==='win'){my.className='hand winglow';bf.style.animation='bgFlashGreen .6s ease forwards';vs.textContent='🎉';spawnBurst('🎉');}
+      else if(result==='lose'){my.className='hand loseshake';bf.style.animation='bgFlashRed .6s ease forwards';vs.textContent='💥';ba.classList.add('shake');setTimeout(function(){ba.classList.remove('shake')},400);spawnBurst('💥');}
+      else{vs.textContent='🤝';}
+      setTimeout(function(){bf.style.animation=''},600);
+      var rc=result==='win'?'#00e87a':result==='lose'?'#ff4757':'#ffc107';
+      var rt=result==='win'?'WIN! +'+WIN_TK+' 🎟️':result==='lose'?'LOSE':'DRAW!';
+      showFloating(rt,rc,'round-result');
+      if(result==='win')showFloating('+'+WIN_TK,rc,'score-pop');
+    },200);
+
+    setTimeout(function(){
+      vs.textContent='VS';G.animating=false;
+      document.querySelectorAll('.choice-btn').forEach(function(b){b.classList.remove('sel','dis')});
+      if(G.round>=ROUNDS){G.phase='result';document.getElementById('choicesArea').style.display='none';setTimeout(showResult,300);}
+      else updateChoicesHint();
+    },1200);
+  },1000);
+}
+
+function spawnBurst(emoji){
+  for(var i=0;i<6;i++){
+    var el=document.createElement('div');el.className='float-fx';el.textContent=emoji;
+    el.style.cssText='font-size:'+(20+Math.random()*16)+'px;left:'+(30+Math.random()*40)+'%;top:'+(30+Math.random()*30)+'%;animation-duration:'+(0.8+Math.random()*0.6)+'s;animation-delay:'+(Math.random()*0.2)+'s';
+    document.getElementById('battle').appendChild(el);setTimeout((function(e){return function(){e.remove()}})(el),1500);
+  }
+}
+
+function showFloating(text,color,cls){
+  var el=document.createElement('div');el.className=cls;el.textContent=text;el.style.color=color;
+  document.getElementById('battle').appendChild(el);setTimeout(function(){el.remove()},1500);
+}
+
+function spawnConfetti(n){
+  var cols=['#00e87a','#f7c948','#ff4757','#60A5FA','#A78BFA','#fff'];
+  for(var i=0;i<n;i++){var d=document.createElement('div');d.className='confetti';
+    var sz=4+Math.random()*8;d.style.cssText='left:'+Math.random()*100+'vw;width:'+sz+'px;height:'+sz+'px;border-radius:'+(Math.random()>.5?'50%':'2px')+';background:'+cols[Math.floor(Math.random()*cols.length)]+';animation:confettiFall '+(1.5+Math.random()*2)+'s ease '+(Math.random()*.5)+'s forwards';
+    document.body.appendChild(d);setTimeout((function(e){return function(){e.remove()}})(d),4000);
+  }
+}
+
+function showResult(){
+  var tk=G.tickets;
+  var winRate=((G.wins/ROUNDS)*100).toFixed(0);
+  var emoji='🎉',title='Game Over!',react='';
+  if(G.wins>=8){emoji='🤯';title='INCREDIBLE!';react='Almost perfect!';}
+  else if(G.wins>=6){emoji='🔥';title='AMAZING!';react='Great job!';}
+  else if(G.wins>=4){emoji='😊';title='NICE!';react='Not bad at all!';}
+  else if(G.wins>=2){emoji='🙂';title='OK!';react='Keep trying!';}
+  else{emoji='😅';title='Tough luck!';react='Better luck next time!';}
+
+  var h='<div class="ov-emoji">'+emoji+'</div>';
+  h+='<div class="ov-title">'+title+'</div>';
+  h+='<div style="font-size:13px;color:#88ccaa;line-height:1.7;margin-bottom:16px">'+react+'</div>';
+  // Big reward
+  var displayTk=tk>0?tk:1;
+  if(tk>0){
+    h+='<div class="reward-pill"><div class="reward-n">'+tk+'</div><div class="reward-lbl">🎟️ TICKETS</div></div>';
+  }else{
+    h+='<div class="reward-pill" style="background:linear-gradient(135deg,#668877,#88ccaa)"><div class="reward-n">+1</div><div class="reward-lbl">🎟️ BONUS TICKET</div></div>';
+  }
+  // Stats
+  h+='<div class="stats">';
+  h+='<div class="stat-row"><span class="stat-lbl">Wins</span><span class="stat-val" style="color:#00e87a">'+G.wins+'</span></div>';
+  h+='<div class="stat-row"><span class="stat-lbl">Draws</span><span class="stat-val" style="color:#ffc107">'+G.draws+'</span></div>';
+  h+='<div class="stat-row"><span class="stat-lbl">Losses</span><span class="stat-val" style="color:#ff4757">'+G.losses+'</span></div>';
+  h+='<div class="stat-row"><span class="stat-lbl">Win Rate</span><span class="stat-val" style="color:#fff">'+winRate+'%</span></div>';
+  h+='</div>';
+  // Button
+  if(tk>0){
+    h+='<button class="ov-btn" onclick="collectWithAd('+tk+')">📺 Collect '+tk+' Tickets</button>';
+  }else{
+    h+='<button class="ov-btn" onclick="collectWithAd(1)">📺 Get 1 Bonus Ticket</button>';
+  }
+
+  document.getElementById('resultBox').innerHTML=h;
+  document.getElementById('ovResult').classList.remove('hidden');
+  if(G.wins>=6)spawnConfetti(G.wins>=8?40:20);
+}
+
+function collectWithAd(amt){
+  showAd(function(){
+    G.totalTk+=amt;G.phase='start';
+    document.getElementById('ovResult').classList.add('hidden');
+    document.getElementById('ovStart').classList.remove('hidden');
+    document.getElementById('choicesArea').style.display='none';
+    document.getElementById('myHand').textContent='✊';document.getElementById('oppHand').textContent='✊';
+    document.getElementById('myHand').className='hand';document.getElementById('oppHand').className='hand';
+    document.getElementById('vsBadge').textContent='VS';
+    updateHUD();renderRbar();
+  });
+}
+
+updateHUD();renderRbar();
+</script>
+</body>
+</html>
