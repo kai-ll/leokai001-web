@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Coin Flip — StepPot</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700;800;900&family=JetBrains+Mono:wght@700;800&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:#F7F9FB;color:#1a3a2f;min-height:100vh;overflow-x:hidden;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none}
+.app{width:100%;max-width:420px;margin:0 auto;min-height:100vh;position:relative;overflow:hidden;display:flex;flex-direction:column}
+.hdr{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:rgba(255,255,255,.95);border-bottom:1px solid rgba(0,180,130,.1);flex-shrink:0;backdrop-filter:blur(10px)}
+.hdr-l{display:flex;align-items:center;gap:9px}
+.hdr-ico{width:34px;height:34px;border-radius:9px;background:linear-gradient(140deg,#00bfa5,#009688);display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 2px 8px rgba(0,191,165,.3)}
+.hdr-t{font-size:14px;font-weight:800;color:#1a3a2f;line-height:1.2}
+.hdr-sub{font-size:9px;font-weight:700;color:#00bfa5;letter-spacing:.04em}
+.hdr-badge{display:flex;align-items:center;gap:4px;background:#eafaf1;border:1.5px solid rgba(0,191,165,.15);border-radius:18px;padding:4px 10px}
+.hdr-badge span{font-size:13px;font-weight:800;color:#009688;font-family:'JetBrains Mono',monospace}
+
+.page{flex:1;display:flex;flex-direction:column;align-items:center;padding:16px 20px 28px;justify-content:center;animation:up .35s ease-out}
+
+/* Home */
+.hero{font-size:24px;font-weight:900;letter-spacing:-.02em;margin-bottom:6px;color:#1a3a2f;text-align:center}
+.hero-p{font-size:13px;color:#6b9b8a;text-align:center;line-height:1.6;margin-bottom:20px}
+.hero-p b{color:#009688}
+.guide{width:100%;display:flex;align-items:center;gap:14px;background:#fff;border-radius:14px;border:1.5px solid #edf0f4;padding:14px 18px;margin-bottom:20px}
+.guide-card{flex:1;display:flex;align-items:center;gap:10px}
+.guide-title{font-size:13px;font-weight:800;color:#1a3a2f}
+.guide-tag{font-size:9px;font-weight:600;color:#6b9b8a;margin-left:3px}
+.guide-sub{font-size:10px;color:#94a3b3;font-weight:600}
+.guide-sep{width:1px;align-self:stretch;background:#edf0f4}
+.cta{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:16px;border-radius:14px;border:none;background:linear-gradient(140deg,#00bfa5,#009688);color:#fff;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 3px 14px rgba(0,191,165,.25);font-family:'DM Sans',sans-serif;animation:pulse 2.5s ease-in-out infinite;transition:transform .15s}
+.cta:active{transform:scale(.96)}
+.cta:disabled{opacity:.35;cursor:not-allowed;animation:none}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
+
+/* Play */
+.reward-wrap{text-align:center;margin-bottom:16px}
+.reward-label{font-size:10px;font-weight:700;color:#94a3b3;text-transform:uppercase;letter-spacing:.08em}
+.reward-big{font-size:52px;font-weight:900;color:#009688;font-family:'JetBrains Mono',monospace;line-height:1;transition:color .3s}
+.reward-big.lost{color:#e74c3c}
+.reward-next{font-size:11px;font-weight:600;color:#bcc5cf;margin-top:2px;min-height:16px}
+
+/* Coin 3D */
+.coin-stage{width:180px;height:180px;perspective:900px;margin-bottom:16px;flex-shrink:0}
+.coin-flip{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:none}
+.coin-face{position:absolute;inset:0;backface-visibility:hidden;display:flex;align-items:center;justify-content:center}
+.coin-back{transform:rotateY(180deg)}
+
+.suspense-text{font-size:14px;font-weight:700;color:#94a3b3;height:22px;letter-spacing:.1em;text-align:center;margin-bottom:8px}
+.side-tag{font-size:14px;font-weight:800;color:#1a3a2f;padding:5px 20px;background:#fff;border-radius:20px;border:1.5px solid #edf0f4;margin-bottom:16px;animation:pop .25s ease-out;display:none}
+
+/* Pick buttons */
+.picks{display:flex;gap:12px;width:100%;max-width:320px;animation:up .25s ease-out}
+.pick-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:16px 12px;border-radius:14px;border:2px solid;cursor:pointer;font-family:'DM Sans',sans-serif;transition:transform .12s,border-color .15s,background .15s;background:none}
+.pick-cara{border-color:rgba(212,160,23,.3);background:linear-gradient(180deg,#fffcf0,#fff3d4)}
+.pick-cara.selected{border-color:#C8960C;background:#FFF8E0;box-shadow:0 3px 12px rgba(200,150,12,.2)}
+.pick-cruz{border-color:rgba(144,164,174,.3);background:linear-gradient(180deg,#f5f8fa,#e8eef2)}
+.pick-cruz.selected{border-color:#6B7A87;background:#EBF0F4;box-shadow:0 3px 12px rgba(107,122,135,.2)}
+.pick-btn:active{transform:scale(.95)}
+.pick-btn:disabled{opacity:.4;cursor:not-allowed}
+.pick-n{font-size:14px;font-weight:900;color:#1a3a2f}
+.pick-s{font-size:9px;font-weight:600;color:#6b9b8a}
+
+.flip-btn{width:100%;padding:16px;border-radius:14px;border:none;background:linear-gradient(140deg,#00bfa5,#009688);color:#fff;font-size:16px;font-weight:800;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 4px 14px rgba(0,191,165,.3);margin-top:14px;transition:transform .12s,opacity .12s}
+.flip-btn:active{transform:scale(.96)}
+.flip-btn:disabled{opacity:.35;cursor:not-allowed;box-shadow:none;background:#b0bac5}
+
+.stop-link{margin-top:12px;padding:10px 24px;border-radius:12px;border:none;background:transparent;color:#e67e22;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;text-decoration:underline;text-underline-offset:3px}
+.stop-link:active{opacity:.7}
+
+/* Wrong state */
+.wrong-wrap{width:100%;max-width:320px;display:flex;flex-direction:column;gap:10px;animation:up .3s ease-out}
+.wrong-title{font-size:16px;font-weight:800;color:#e74c3c;text-align:center;margin-bottom:6px}
+.revive-btn{width:100%;padding:15px;border-radius:13px;border:none;background:linear-gradient(140deg,#00bfa5,#009688);color:#fff;font-size:14px;font-weight:800;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 3px 14px rgba(0,191,165,.25)}
+.revive-btn:active{transform:scale(.96)}
+.revive-btn:disabled{opacity:.4;cursor:not-allowed}
+.giveup-btn{width:100%;padding:12px;border-radius:13px;border:1.5px solid #e0e5ea;background:#fff;color:#64748b;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif}
+.giveup-btn:active{transform:scale(.96)}
+.giveup-btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* Awaiting */
+.awaiting-wrap{text-align:center;padding:16px;animation:up .3s ease-out}
+.awaiting-text{font-size:16px;font-weight:800;color:#009688}
+
+/* Toast */
+.toast{position:absolute;top:16px;left:50%;transform:translateX(-50%);z-index:10;padding:8px 20px;border-radius:12px;font-size:13px;font-weight:700;box-shadow:0 4px 16px rgba(0,0,0,.08);white-space:nowrap;animation:toastIn .3s ease-out;pointer-events:none}
+.toast.win{background:#eafaf1;color:#009688;border:1.5px solid rgba(0,191,165,.2)}
+.toast.shield{background:#ebf5fb;color:#2471a3;border:1.5px solid rgba(52,152,219,.2)}
+.toast.bonus{background:#FFF3CD;color:#C07800;border:1.5px solid #F0A500;font-size:15px;padding:10px 24px}
+.toast.lose{background:#fff5f5;color:#c0392b;border:1.5px solid #fec8c8}
+
+/* Confetti */
+.confetti{position:absolute;top:-4%;border-radius:2px;animation:confettiFall ease-in forwards}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes up{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pop{0%{opacity:0;transform:scale(.4)}65%{transform:scale(1.12)}100%{opacity:1;transform:scale(1)}}
+@keyframes shakeX{0%,100%{transform:translateX(0)}20%{transform:translateX(-10px)}40%{transform:translateX(10px)}60%{transform:translateX(-8px)}80%{transform:translateX(8px)}}
+@keyframes bump{0%{transform:scale(1)}50%{transform:scale(1.18)}100%{transform:scale(1)}}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,-10px)}to{opacity:1;transform:translate(-50%,0)}}
+@keyframes confettiFall{0%{transform:translateY(0) rotate(0);opacity:1}100%{transform:translateY(500px) rotate(720deg);opacity:0}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Ad overlay */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:50;animation:fadeIn .2s}
+.ad-box{width:78%;max-width:300px;padding:36px 24px;border-radius:18px;background:#fff;display:flex;flex-direction:column;align-items:center;gap:12px}
+.ad-spin{width:32px;height:32px;border-radius:50%;border:3px solid #edf0f4;border-top-color:#00bfa5;animation:spin 1.2s linear infinite}
+.ad-bar-bg{width:80%;height:4px;border-radius:2px;background:#edf0f4;overflow:hidden}
+.ad-bar-fg{height:100%;border-radius:2px;background:linear-gradient(90deg,#00bfa5,#009688);transition:width .08s linear}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+<div class="hdr">
+  <div class="hdr-l">
+    <div class="hdr-ico">🪙</div>
+    <div><div class="hdr-t">Coin Flip</div><div class="hdr-sub">by StepPot</div></div>
+  </div>
+  <div class="hdr-badge"><span style="font-size:12px">🎟️</span><span id="tkDisplay">—</span></div>
+</div>
+
+<!-- HOME -->
+<div id="screenHome" class="page" style="display:none">
+  <div style="animation:float 3s ease-in-out infinite;margin:16px 0 16px" id="homeCoin"></div>
+  <h1 class="hero">Double or Nothing</h1>
+  <p class="hero-p">Flip the coin & guess right to <b>double</b> your tickets.<br>You can stop and collect anytime!</p>
+  <div class="guide">
+    <div class="guide-card"><div id="guideCara"></div><div><div class="guide-title">CARA <span class="guide-tag">Heads</span></div><div class="guide-sub">Front side</div></div></div>
+    <div class="guide-sep"></div>
+    <div class="guide-card"><div id="guideCruz"></div><div><div class="guide-title">CRUZ <span class="guide-tag">Tails</span></div><div class="guide-sub">Back side</div></div></div>
+  </div>
+  <button class="cta" id="startBtn" onclick="handleStart()">▶ Let's Flip!</button>
+</div>
+
+<!-- PLAY -->
+<div id="screenPlay" class="page" style="display:none;position:relative">
+  <div id="toastEl" class="toast" style="display:none"></div>
+
+  <div class="reward-wrap" id="rewardWrap">
+    <div class="reward-label">TICKETS</div>
+    <div class="reward-big" id="rewardNum">0</div>
+    <div class="reward-next" id="rewardNext"></div>
+  </div>
+
+  <div id="coinShake">
+    <div class="coin-stage">
+      <div class="coin-flip" id="coinFlip">
+        <div class="coin-face" id="coinFront"></div>
+        <div class="coin-face coin-back" id="coinBackFace"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="suspense-text" id="suspenseText"></div>
+  <div class="side-tag" id="sideTag"></div>
+
+  <!-- Wrong state -->
+  <div id="wrongWrap" class="wrong-wrap" style="display:none">
+    <div class="wrong-title" id="wrongTitle">No luck!</div>
+    <button class="revive-btn" id="reviveBtn" onclick="doRevive()"></button>
+    <button class="giveup-btn" id="giveupBtn" onclick="doGiveUp()"></button>
+  </div>
+
+  <!-- Awaiting finalize -->
+  <div id="awaitingWrap" class="awaiting-wrap" style="display:none">
+    <div class="awaiting-text" id="awaitingText">🎉 0 tickets ready!</div>
+  </div>
+
+  <!-- Pick buttons -->
+  <div id="picksWrap" style="display:none;width:100%;max-width:320px;display:none">
+    <div class="picks">
+      <button class="pick-btn pick-cara" id="pickCara" onclick="selectSide('cara')">
+        <div id="pickCoinCara"></div>
+        <div><div class="pick-n">CARA</div><div class="pick-s">Heads</div></div>
+      </button>
+      <button class="pick-btn pick-cruz" id="pickCruz" onclick="selectSide('cruz')">
+        <div id="pickCoinCruz"></div>
+        <div><div class="pick-n">CRUZ</div><div class="pick-s">Tails</div></div>
+      </button>
+    </div>
+    <button class="flip-btn" id="flipBtn" onclick="doFlip()" disabled>Flip!</button>
+    <div style="text-align:center">
+      <button class="stop-link" id="stopBtn" onclick="doStop()" style="display:none">✋ Stop & collect 0 tickets</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFETTI -->
+<div id="confettiWrap" style="position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;overflow:hidden;z-index:5;display:none"></div>
+
+<!-- AD OVERLAY (demo fallback) -->
+<div class="overlay" id="adOverlay" style="display:none">
+  <div class="ad-box">
+    <div class="ad-spin"></div>
+    <div style="font-size:12px;font-weight:700;color:#64748b">Playing ad…</div>
+    <div class="ad-bar-bg"><div class="ad-bar-fg" id="adBar" style="width:0%"></div></div>
+  </div>
+</div>
+
+</div><!-- /app -->
+
+<script>
+// ── State ─────────────────────────────────────────────────────────────
+var hostConfig = {};
+var G = {
+  phase: 'home',      // home | pick | flipping | wrong | awaiting
+  selectedSide: null,
+  rewardPreview: 0,
+  revivesLeft: 2,
+  flipAngle: 0,
+  isLoading: false,
+  adCb: null,
+  pendingRevive: false,
+};
+var CONSOLATION = 1;
+var MAX_REVIVES = 2; // fallback, overridden by HOST_CONFIG
+var flipIv = null;
+var actionSeq = 0;
+var pendingFlipResult = null;
+var flipAnimReady = false;
+var FLIP_MIN_MS = 2000;
+
+function genActionId() { return 'cf_' + Date.now() + '_' + (++actionSeq); }
+
+// ── postMessage bridge ────────────────────────────────────────────────
+function postToHost(obj) {
+  var str = JSON.stringify(obj);
+  if (window.ReactNativeWebView) {
+    window.ReactNativeWebView.postMessage(str);
+  } else if (window.parent && window.parent !== window) {
+    window.parent.postMessage(str, '*');
+  } else {
+    window.postMessage(str, '*');
+  }
+}
+
+// ── Coin SVG ─────────────────────────────────────────────────────────
+function pesoCoin(side, size) {
+  var c = side === 'cara';
+  var u = side + size + Math.random().toString(36).slice(2, 6);
+  var col = c
+    ? {o:'#D4A017',m:'#FFD54F',i:'#FFF176',t:'rgba(120,75,0,.55)',tl:'rgba(120,75,0,.35)'}
+    : {o:'#7B8A99',m:'#B0BEC5',i:'#CFD8DC',t:'rgba(40,55,70,.55)',tl:'rgba(40,55,70,.35)'};
+  var dots = '';
+  for (var i = 0; i < 36; i++) {
+    var a = i * 10 * Math.PI / 180;
+    dots += '<circle cx="' + (100 + 86 * Math.cos(a)) + '" cy="' + (98 + 86 * Math.sin(a)) + '" r="1.3" fill="' + col.tl + '"/>';
+  }
+  var inner = c
+    ? '<circle cx="100" cy="62" r="20" fill="' + col.tl + '"/>' +
+      '<ellipse cx="100" cy="78" rx="18" ry="10" fill="' + col.tl + '"/>' +
+      '<path d="M74 88Q80 76 100 76Q120 76 126 88L132 105Q100 100 68 105Z" fill="' + col.tl + '"/>' +
+      '<text x="100" y="130" text-anchor="middle" font-size="16" font-weight="900" fill="' + col.t + '" font-family="sans-serif" letter-spacing="2">1 PISO</text>' +
+      '<text x="100" y="158" text-anchor="middle" font-size="18" font-weight="900" fill="' + col.t + '" font-family="sans-serif" letter-spacing="4">CARA</text>'
+    : (function () {
+        var p = '';
+        [0,45,90,135,180,225,270,315].forEach(function (ang) {
+          var r = ang * Math.PI / 180;
+          p += '<ellipse cx="' + (100 + 22 * Math.cos(r)) + '" cy="' + (75 + 22 * Math.sin(r)) + '" rx="12" ry="7" transform="rotate(' + ang + ',' + (100 + 22 * Math.cos(r)) + ',' + (75 + 22 * Math.sin(r)) + ')" fill="' + col.tl + '"/>';
+        });
+        return p;
+      })() +
+      '<circle cx="100" cy="75" r="10" fill="' + col.t + '" opacity=".4"/>' +
+      '<text x="100" y="118" text-anchor="middle" font-size="10" font-weight="700" fill="' + col.tl + '" font-family="serif" letter-spacing="2">BANGKO SENTRAL</text>' +
+      '<text x="100" y="158" text-anchor="middle" font-size="18" font-weight="900" fill="' + col.t + '" font-family="sans-serif" letter-spacing="4">CRUZ</text>';
+  return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 200 200" style="display:block">' +
+    '<defs><radialGradient id="g' + u + '" cx="38%" cy="30%" r="65%">' +
+    '<stop offset="0%" stop-color="' + col.i + '"/><stop offset="50%" stop-color="' + col.m + '"/><stop offset="100%" stop-color="' + col.o + '"/>' +
+    '</radialGradient></defs>' +
+    '<circle cx="100" cy="102" r="94" fill="rgba(0,0,0,.12)"/>' +
+    '<circle cx="100" cy="98" r="96" fill="url(#g' + u + ')"/>' +
+    '<circle cx="100" cy="98" r="92" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="1.5"/>' +
+    '<circle cx="100" cy="98" r="78" fill="none" stroke="' + col.tl + '" stroke-width=".8"/>' +
+    dots + '<g>' + inner + '</g></svg>';
+}
+
+// init coin elements
+document.getElementById('homeCoin').innerHTML = pesoCoin('cara', 120);
+document.getElementById('guideCara').innerHTML = pesoCoin('cara', 40);
+document.getElementById('guideCruz').innerHTML = pesoCoin('cruz', 40);
+document.getElementById('coinFront').innerHTML = pesoCoin('cara', 170);
+document.getElementById('coinBackFace').innerHTML = pesoCoin('cruz', 170);
+document.getElementById('pickCoinCara').innerHTML = pesoCoin('cara', 28);
+document.getElementById('pickCoinCruz').innerHTML = pesoCoin('cruz', 28);
+
+// ── UI helpers ────────────────────────────────────────────────────────
+function show(id) { document.getElementById(id).style.display = ''; }
+function hide(id) { document.getElementById(id).style.display = 'none'; }
+
+function showScreen(s) {
+  hide('screenHome'); hide('screenPlay');
+  show('screen' + s.charAt(0).toUpperCase() + s.slice(1));
+}
+
+function showToast(text, cls, dur) {
+  var el = document.getElementById('toastEl');
+  el.textContent = text; el.className = 'toast ' + cls; el.style.display = '';
+  el.style.animation = 'none'; void el.offsetWidth; el.style.animation = 'toastIn .3s ease-out';
+  setTimeout(function () { el.style.display = 'none'; }, dur || 1500);
+}
+
+function spawnConfetti() {
+  var w = document.getElementById('confettiWrap'); w.innerHTML = ''; w.style.display = '';
+  var cols = ['#00bfa5','#ffd700','#ff6b6b','#3498db','#f39c12','#e056a0'];
+  for (var i = 0; i < 22; i++) {
+    var d = document.createElement('div'); d.className = 'confetti';
+    var sz = 5 + Math.random() * 7;
+    d.style.cssText = 'left:' + Math.random() * 100 + '%;width:' + sz + 'px;height:' + (sz * (i % 3 === 0 ? 1 : 2)) + 'px;background:' + cols[i % 6] + ';border-radius:' + (i % 3 === 0 ? '50%' : '2px') + ';animation-duration:' + (0.8 + Math.random() * 1) + 's;animation-delay:' + Math.random() * 0.5 + 's';
+    w.appendChild(d);
+  }
+  setTimeout(function () { w.style.display = 'none'; }, 2500);
+}
+
+function bumpReward() {
+  var w = document.getElementById('rewardWrap');
+  w.style.animation = 'none'; void w.offsetWidth; w.style.animation = 'bump .35s ease-out';
+  setTimeout(function () { w.style.animation = ''; }, 400);
+}
+
+function shakeX() {
+  var el = document.getElementById('coinShake');
+  el.style.animation = 'none'; void el.offsetWidth; el.style.animation = 'shakeX .4s ease-in-out';
+  setTimeout(function () { el.style.animation = ''; }, 400);
+}
+
+function updateRewardUI() {
+  document.getElementById('rewardNum').textContent = G.rewardPreview;
+  document.getElementById('rewardNum').className = 'reward-big' + (G.phase === 'wrong' ? ' lost' : '');
+  var nxt = document.getElementById('rewardNext');
+  if (G.rewardPreview > 0 && G.phase !== 'wrong' && G.phase !== 'awaiting') {
+    var maxR = hostConfig.maxReward || 1024;
+    var next = Math.min(G.rewardPreview * 2, maxR);
+    nxt.textContent = next > G.rewardPreview ? 'next win → ' + next + ' 🎟️' : '';
+  } else {
+    nxt.textContent = '';
+  }
+  var stopBtn = document.getElementById('stopBtn');
+  if (G.rewardPreview > 0 && G.phase === 'pick') {
+    stopBtn.style.display = '';
+    stopBtn.textContent = '✋ Stop & collect ' + G.rewardPreview + ' tickets';
+  } else {
+    stopBtn.style.display = 'none';
+  }
+}
+
+function setLoading(v) {
+  G.isLoading = v;
+  document.getElementById('flipBtn').disabled = v || !G.selectedSide;
+  document.getElementById('pickCara').disabled = v;
+  document.getElementById('pickCruz').disabled = v;
+  if (document.getElementById('reviveBtn')) document.getElementById('reviveBtn').disabled = v;
+  if (document.getElementById('giveupBtn')) document.getElementById('giveupBtn').disabled = v;
+}
+
+// ── Ad (demo fallback) ────────────────────────────────────────────────
+function runAd(cb) {
+  G.adCb = cb;
+  show('adOverlay');
+  var bar = document.getElementById('adBar'); bar.style.width = '0%'; var p = 0;
+  var iv = setInterval(function () {
+    p += 3; bar.style.width = p + '%';
+    if (p >= 100) { clearInterval(iv); setTimeout(function () { hide('adOverlay'); if (G.adCb) G.adCb(); }, 200); }
+  }, 55);
+}
+window.onAdComplete = function () { hide('adOverlay'); if (G.adCb) G.adCb(); };
+document.addEventListener('message', function (e) { try { var d = JSON.parse(e.data); if (d.type === 'AD_COMPLETE') window.onAdComplete(); } catch (ex) {} });
+window.addEventListener('message', function (e) {
+  if (typeof e.data !== 'string') return;
+  try {
+    var d = JSON.parse(e.data);
+    if (!d || !d.type) return;
+    if (d.type === 'AD_COMPLETE') { window.onAdComplete(); return; }
+    if (d.type === 'HOST_CONFIG') { handleHostConfig(d.config || {}); return; }
+    if (d.type === 'HOST_ACTION_RESULT') { handleActionResult(d); return; }
+  } catch (ex) {}
+});
+
+// ── HOST_CONFIG ───────────────────────────────────────────────────────
+function handleHostConfig(cfg) {
+  hostConfig = cfg;
+  if (typeof cfg.maxRevives === 'number') MAX_REVIVES = cfg.maxRevives;
+  if (typeof cfg.consolation === 'number') CONSOLATION = cfg.consolation;
+  document.getElementById('tkDisplay').textContent = cfg.rewardPreview !== undefined ? cfg.rewardPreview : '—';
+  if (G.phase === 'home') {
+    show('screenHome');
+  }
+}
+
+// ── Start ─────────────────────────────────────────────────────────────
+function handleStart() {
+  G.rewardPreview = 0; G.selectedSide = null; G.flipAngle = 0; G.pendingRevive = false;
+  document.getElementById('coinFlip').style.transform = 'rotateY(0deg)';
+  showScreen('play');
+  enterPickPhase();
+}
+
+function enterPickPhase() {
+  G.phase = 'pick';
+  show('picksWrap'); hide('wrongWrap'); hide('awaitingWrap');
+  hide('sideTag'); document.getElementById('suspenseText').textContent = '';
+  document.getElementById('pickCara').classList.remove('selected');
+  document.getElementById('pickCruz').classList.remove('selected');
+  G.selectedSide = null;
+  document.getElementById('flipBtn').disabled = true;
+  document.getElementById('flipBtn').textContent = G.rewardPreview === 0 ? 'Flip!' : 'Flip to double!';
+  setLoading(false);
+  updateRewardUI();
+}
+
+function selectSide(side) {
+  if (G.isLoading || G.phase !== 'pick') return;
+  G.selectedSide = side;
+  document.getElementById('pickCara').classList.toggle('selected', side === 'cara');
+  document.getElementById('pickCruz').classList.toggle('selected', side === 'cruz');
+  document.getElementById('flipBtn').disabled = false;
+}
+
+// ── Flip ──────────────────────────────────────────────────────────────
+function doFlip() {
+  if (!G.selectedSide || G.isLoading || G.phase !== 'pick') return;
+  G.phase = 'flipping';
+  pendingFlipResult = null;
+  flipAnimReady = false;
+  setLoading(true);
+  hide('picksWrap'); hide('sideTag'); hide('stopBtn');
+  var st = document.getElementById('suspenseText');
+
+  var cf = document.getElementById('coinFlip');
+  var a = G.flipAngle;
+
+  flipIv = setInterval(function () { a += 28; cf.style.transform = 'rotateY(' + a + 'deg)'; }, 16);
+  setTimeout(function () { st.textContent = '· · ·'; }, 400);
+
+  setTimeout(function () {
+    if (flipIv) clearInterval(flipIv);
+    var sa = a;
+    flipIv = setInterval(function () { sa += 6; cf.style.transform = 'rotateY(' + sa + 'deg)'; a = sa; }, 16);
+    st.textContent = 'Cara o Cruz?';
+  }, 1100);
+
+  setTimeout(function () {
+    if (flipIv) clearInterval(flipIv);
+    flipIv = null;
+    st.textContent = '· · ·';
+    flipAnimReady = true;
+    if (pendingFlipResult) {
+      var res = pendingFlipResult;
+      pendingFlipResult = null;
+      applyFlipResult(res);
+    }
+  }, FLIP_MIN_MS);
+
+  var actionId = genActionId();
+  var choice = G.selectedSide;
+
+  setTimeout(function () {
+    postToHost({ type: 'GAME_ACTION', payload: { actionType: 'play_turn', choice: choice }, actionId: actionId });
+  }, 100);
+}
+
+function applyFlipResult(d) {
+  if (flipIv) clearInterval(flipIv);
+  var cf = document.getElementById('coinFlip');
+  var coinResult = (d.detail && d.detail.coinResult) || 'cara';
+  var cur = G.flipAngle || 0;
+  try { cur = parseFloat(cf.style.transform.replace(/[^0-9.-]/g,'')) || 0; } catch(e){}
+  var base = Math.ceil(cur / 360) * 360;
+  var finalAngle = coinResult === 'cara' ? base : base + 180;
+  G.flipAngle = finalAngle;
+  cf.style.transform = 'rotateY(' + finalAngle + 'deg)';
+  document.getElementById('suspenseText').textContent = '';
+
+  setTimeout(function () {
+    var tag = document.getElementById('sideTag');
+    tag.textContent = coinResult === 'cara' ? '👑 CARA' : '🌸 CRUZ';
+    tag.style.display = ''; tag.style.animation = 'none'; void tag.offsetWidth; tag.style.animation = 'pop .25s ease-out';
+
+    setTimeout(function () {
+      G.rewardPreview = d.rewardPreview || 0;
+      var outcome = d.outcome;
+      var status = d.status;
+      var isFirstFlip = d.detail && d.detail.isFirstFlip;
+      var hasBonusAfter = d.detail && d.detail.hasBonusAfter;
+      var isBonusChance = outcome === 'continue' && isFirstFlip && hasBonusAfter === false;
+
+      if (isBonusChance) {
+        showToast('🎁 Bonus Chance! One more try!', 'bonus', 2200);
+        updateRewardUI();
+        setTimeout(enterPickPhase, 1400);
+      } else if (outcome === 'win' || outcome === 'continue') {
+        bumpReward();
+        showToast('🎟️ ' + G.rewardPreview, 'win', 1200);
+        updateRewardUI();
+        if (status === 'awaiting_finalize') {
+          enterAwaitingPhase();
+        } else {
+          setTimeout(enterPickPhase, 600);
+        }
+      } else {
+        shakeX();
+        updateRewardUI();
+        var serverMaxRevives = (d.detail && typeof d.detail.maxRevives === 'number') ? d.detail.maxRevives : MAX_REVIVES;
+        var revivesUsedAfter = (d.detail && typeof d.detail.revivesUsedAfter === 'number') ? d.detail.revivesUsedAfter : serverMaxRevives;
+        var remaining = serverMaxRevives - revivesUsedAfter;
+        G.revivesLeft = remaining;
+        G.pendingRevive = remaining > 0;
+
+        if (G.pendingRevive) {
+          enterWrongPhase();
+        } else {
+          enterAwaitingPhase();
+        }
+      }
+      setLoading(false);
+    }, 350);
+  }, 200);
+}
+
+// ── Wrong phase ───────────────────────────────────────────────────────
+function enterWrongPhase() {
+  G.phase = 'wrong';
+  hide('picksWrap'); hide('awaitingWrap'); show('wrongWrap');
+  document.getElementById('wrongTitle').textContent = G.rewardPreview > 0 ? 'Lost ' + G.rewardPreview + ' 🎟️' : 'No luck!';
+  document.getElementById('reviveBtn').textContent = '📺 Watch Ad & Continue (' + G.revivesLeft + ' left)';
+  document.getElementById('giveupBtn').textContent = 'Give Up (+' + CONSOLATION + ' consolation 🎟️)';
+  setLoading(false);
+}
+
+function doRevive() {
+  if (G.isLoading) return;
+  setLoading(true);
+  var actionId = genActionId();
+  postToHost({ type: 'GAME_ACTION', payload: { actionType: 'revive' }, actionId: actionId });
+}
+
+function doGiveUp() {
+  if (G.isLoading) return;
+  setLoading(true);
+  var actionId = genActionId();
+  postToHost({ type: 'GAME_ACTION', payload: { actionType: 'give_up' }, actionId: actionId });
+}
+
+// ── Stop & Collect ────────────────────────────────────────────────────
+function doStop() {
+  if (G.isLoading || G.rewardPreview === 0) return;
+  setLoading(true);
+  var actionId = genActionId();
+  postToHost({ type: 'GAME_ACTION', payload: { actionType: 'stop_collect' }, actionId: actionId });
+}
+
+// ── Awaiting phase (host will transition to reward step) ──────────────
+function enterAwaitingPhase() {
+  G.phase = 'awaiting';
+  hide('picksWrap'); hide('wrongWrap'); show('awaitingWrap');
+  document.getElementById('awaitingText').textContent = '🎉 ' + G.rewardPreview + ' tickets ready to claim!';
+  spawnConfetti();
+  updateRewardUI();
+  setLoading(false);
+  postToHost({ type: 'GAME_OVER', rewardPreview: G.rewardPreview });
+}
+
+// ── HOST_ACTION_RESULT handler ────────────────────────────────────────
+function handleActionResult(d) {
+  if (d.error) {
+    setLoading(false);
+    showToast('Error: ' + d.error, 'lose', 2500);
+    if (G.phase === 'flipping') setTimeout(enterPickPhase, 2600);
+    return;
+  }
+
+  var actionType = d._actionType || 'play_turn';
+
+  if (G.phase === 'flipping') {
+    if (flipAnimReady) {
+      applyFlipResult(d);
+    } else {
+      pendingFlipResult = d;
+    }
+    return;
+  }
+
+  if (d.status === 'in_progress') {
+    G.rewardPreview = d.rewardPreview || 0;
+    hide('wrongWrap'); hide('awaitingWrap');
+    updateRewardUI();
+    setTimeout(enterPickPhase, 300);
+  } else if (d.status === 'awaiting_finalize') {
+    G.rewardPreview = d.rewardPreview || 0;
+    updateRewardUI();
+    enterAwaitingPhase();
+  }
+}
+
+// ── Init ──────────────────────────────────────────────────────────────
+show('screenHome');
+</script>
+</body>
+</html>
