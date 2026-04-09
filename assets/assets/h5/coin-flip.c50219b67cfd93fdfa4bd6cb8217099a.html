@@ -570,6 +570,12 @@ function handleActionResult(d) {
     return;
   }
 
+  if (d.outcome === 'noop' && d.detail && d.detail.adFailed) {
+    setLoading(false);
+    showToast('Ad not available. Try again!', 'lose', 2000);
+    return;
+  }
+
   var actionType = d._actionType || 'play_turn';
 
   if (G.phase === 'flipping') {

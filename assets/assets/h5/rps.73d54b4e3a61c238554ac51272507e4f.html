@@ -46,39 +46,14 @@ body{font-family:'DM Sans',sans-serif;background:#e8f5f0;color:#1a3a2f;min-heigh
 .float-fx{position:absolute;pointer-events:none;z-index:60;animation:scoreFloat 1.2s ease forwards}
 .round-result{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:40px;font-weight:900;pointer-events:none;z-index:50;text-shadow:0 3px 10px rgba(0,0,0,.7);animation:scoreFloat 1.4s ease forwards}
 .score-pop{position:absolute;left:50%;top:25%;transform:translateX(-50%);font-size:24px;font-weight:900;pointer-events:none;z-index:55;animation:scoreFloat 1s ease forwards}
-/* Overlays */
-.ov{position:fixed;inset:0;z-index:200;background:rgba(230,245,240,.96);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:20px}
-.ov.hidden{display:none}
-.ov-box{background:#fff;border:1.5px solid rgba(0,180,130,.12);border-radius:24px;padding:28px 24px;text-align:center;width:100%;max-width:340;animation:slideIn .3s ease;max-height:90vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.08)}
-.ov-emoji{font-size:56px;margin-bottom:8px;animation:popIn .4s ease}
-.ov-title{font-size:24px;font-weight:900;color:#009688;margin-bottom:6px}
-.ov-desc{font-size:13px;color:#6b9b8a;line-height:1.7;margin-bottom:16px;white-space:pre-line}
-.score-rules{background:rgba(0,150,110,.05);border-radius:12px;padding:12px;margin-bottom:16px}
-.score-rules-t{font-size:11px;color:#6b9b8a;margin-bottom:6px;font-weight:700}
-.score-rules-row{display:flex;justify-content:space-around;font-size:13px}
-.sr-item{text-align:center}.sr-val{font-weight:900;font-size:18px}.sr-lbl{font-size:10px;color:#6b9b8a}
-.ov-btn{width:100%;padding:15px;font-size:16px;font-weight:900;background:linear-gradient(135deg,#00bfa5,#009688);color:#fff;border:none;border-radius:14px;cursor:pointer;margin-bottom:8px;font-family:'DM Sans',sans-serif;box-shadow:0 3px 14px rgba(0,191,165,.25)}
-.ov-btn:active{transform:scale(.95)}
-.ov-btn:disabled{background:#ccc;color:#999;cursor:not-allowed;animation:none;box-shadow:none}
-.ov-btn-ghost{width:100%;padding:12px;font-size:13px;font-weight:700;background:transparent;color:#6b9b8a;border:1.5px solid rgba(0,150,110,.15);border-radius:12px;cursor:pointer;font-family:'DM Sans',sans-serif}
-.ov-note{font-size:11px;color:#6b9b8a;margin-top:8px;font-weight:600}
-.ov-note2{font-size:10px;color:#446655;margin-top:4px}
-/* Stats */
-.stats{background:rgba(0,150,110,.05);border-radius:12px;padding:10px 14px;margin-bottom:14px}
-.stat-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(0,150,110,.08)}
-.stat-row:last-child{border-bottom:none}
-.stat-lbl{font-size:12px;color:#6b9b8a}.stat-val{font-size:13px;font-weight:700}
-/* Reward */
-.reward-pill{background:linear-gradient(135deg,#e8a800,#f5c542);border-radius:16px;padding:14px 28px;margin:12px 0 16px;display:inline-block;box-shadow:0 3px 12px rgba(232,168,0,.2)}
-.reward-n{font-size:44px;font-weight:900;color:#fff}.reward-lbl{font-size:11px;color:rgba(120,75,0,.6);font-weight:700}
+/* Awaiting */
+.awaiting-wrap{position:absolute;bottom:80px;left:50%;transform:translateX(-50%);text-align:center;padding:16px;z-index:20;animation:slideIn .3s ease}
+.awaiting-text{font-size:18px;font-weight:800;color:#009688}
 /* Confetti */
 .confetti{position:fixed;pointer-events:none;z-index:300;top:-10px}
-/* Ad */
-.ad-ov{position:fixed;inset:0;z-index:250;background:rgba(0,0,0,.85);display:flex;flex-direction:column;align-items:center;justify-content:center}
-.ad-ov.hidden{display:none}
 
 @keyframes popIn{0%{transform:scale(0);opacity:0}60%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
-@keyframes slideIn{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes slideIn{from{transform:translateX(-50%) translateY(20px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
 @keyframes glow{0%,100%{box-shadow:0 0 12px #00ff8888}50%{box-shadow:0 0 28px #00ff88cc,0 0 50px #00ff8844}}
 @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
@@ -120,56 +95,58 @@ body{font-family:'DM Sans',sans-serif;background:#e8f5f0;color:#1a3a2f;min-heigh
   </div>
 </div>
 
-<!-- Start -->
-<div class="ov" id="ovStart">
-  <div class="ov-box">
-    <div class="ov-emoji">🤜🤛</div>
-    <div class="ov-title">Bato Bato Pick!</div>
-    <div class="ov-desc">7 rounds of Bato-Bato-Pick!
-Win = 3 tickets per round! 🎟️</div>
-    <div class="score-rules"><div class="score-rules-t">Rewards</div>
-      <div class="score-rules-row">
-        <div class="sr-item"><div class="sr-val" style="color:#00e87a">+3 🎟️</div><div class="sr-lbl">WIN</div></div>
-        <div class="sr-item"><div class="sr-val" style="color:#ffc107">0</div><div class="sr-lbl">DRAW</div></div>
-        <div class="sr-item"><div class="sr-val" style="color:#ff4757">0</div><div class="sr-lbl">LOSE</div></div>
-      </div>
-    </div>
-    <button class="ov-btn" id="startBtn" onclick="startGame()">▶ Play Now!</button>
-    <div class="ov-note" id="startNote" style="font-size:11px;color:#88ccaa;margin-top:8px"></div>
-  </div>
+<div class="awaiting-wrap" id="awaitingWrap" style="display:none">
+  <div class="awaiting-text" id="awaitingText"></div>
 </div>
-
-<!-- Ad -->
-<div class="ad-ov hidden" id="ovAd">
-  <div style="color:#666;font-size:14px;margin-bottom:16px">📺 Advertisement</div>
-  <div style="color:#fff;font-size:48px;font-weight:900" id="adTimer">5</div>
-  <div style="color:#444;font-size:12px;margin-top:20px">Please wait...</div>
-</div>
-
-<!-- Result -->
-<div class="ov hidden" id="ovResult"><div class="ov-box" id="resultBox"></div></div>
 </div>
 
 <script>
-var ROUNDS=7,WIN_TK=3,MAX_PLAYS=3;
 var HANDS={rock:'✊',scissors:'✌️',paper:'🖐️'};
 
-var G={round:0,wins:0,losses:0,draws:0,tickets:0,results:[],animating:false,phase:'start',playsUsed:0,totalTk:0};
+var hostConfig={};
+var TOTAL_ROUNDS=5;
+var WIN_REWARD=20;
 
-function getWinner(p,o){if(p===o)return'draw';if((p==='rock'&&o==='scissors')||(p==='scissors'&&o==='paper')||(p==='paper'&&o==='rock'))return'win';return'lose'}
-function randChoice(){return['rock','scissors','paper'][Math.floor(Math.random()*3)]}
+var G={round:0,wins:0,losses:0,draws:0,rewardPreview:0,results:[],animating:false,phase:'waiting',isLoading:false};
+var actionSeq=0;
+
+function genActionId(){return 'rps_'+Date.now()+'_'+(++actionSeq);}
+
+function postToHost(obj){
+  var str=JSON.stringify(obj);
+  if(window.ReactNativeWebView){
+    window.ReactNativeWebView.postMessage(str);
+  }else if(window.parent&&window.parent!==window){
+    window.parent.postMessage(str,'*');
+  }else{
+    window.postMessage(str,'*');
+  }
+}
+
+window.addEventListener('message',function(e){
+  if(typeof e.data!=='string')return;
+  try{
+    var d=JSON.parse(e.data);
+    if(!d||!d.type)return;
+    if(d.type==='HOST_CONFIG'){handleHostConfig(d.config||{});return;}
+    if(d.type==='HOST_ACTION_RESULT'){handleActionResult(d);return;}
+  }catch(ex){}
+});
+
+function handleHostConfig(cfg){
+  hostConfig=cfg;
+  if(typeof cfg.totalRounds==='number')TOTAL_ROUNDS=cfg.totalRounds;
+  if(typeof cfg.winReward==='number')WIN_REWARD=cfg.winReward;
+  document.getElementById('hudTk').textContent=cfg.rewardPreview!==undefined?cfg.rewardPreview:'0';
+  startGame();
+}
 
 function updateHUD(){
-  document.getElementById('hudTk').textContent=G.totalTk;
-  var left=MAX_PLAYS-G.playsUsed;
-  var btn=document.getElementById('startBtn');
-  var note=document.getElementById('startNote');
-  if(left<=0){btn.disabled=true;btn.textContent='No Plays Left';note.textContent='Tap again to reset (demo)';note.style.color='#ff4757';btn.onclick=function(){G.playsUsed=0;btn.disabled=false;btn.onclick=function(){startGame()};updateHUD();};}
-  else{btn.disabled=false;btn.textContent='▶ Play ('+left+'/'+MAX_PLAYS+')';note.textContent='';note.style.color='#88ccaa';btn.onclick=function(){startGame()};}
+  document.getElementById('hudTk').textContent=G.rewardPreview;
 }
 
 function renderRbar(){
-  var h='';for(var i=0;i<ROUNDS;i++){
+  var h='';for(var i=0;i<TOTAL_ROUNDS;i++){
     var cls='rdot';
     if(i<G.results.length)cls+=' '+G.results[i];
     else if(i===G.results.length&&G.phase==='playing')cls+=' cur';
@@ -177,64 +154,108 @@ function renderRbar(){
   }document.getElementById('rbar').innerHTML=h;
 }
 
-function showAd(cb){
-  document.getElementById('ovAd').classList.remove('hidden');
-  var t=5;document.getElementById('adTimer').textContent=t;
-  var iv=setInterval(function(){t--;document.getElementById('adTimer').textContent=t;
-    if(t<=0){clearInterval(iv);document.getElementById('ovAd').classList.add('hidden');cb();}
-  },1000);
-}
-
 function startGame(){
-  if(G.playsUsed>=MAX_PLAYS)return;
-  G.playsUsed++;G.round=0;G.wins=0;G.losses=0;G.draws=0;G.tickets=0;G.results=[];G.animating=false;G.phase='playing';
+  G.round=0;G.wins=0;G.losses=0;G.draws=0;G.rewardPreview=0;G.results=[];G.animating=false;G.phase='playing';G.isLoading=false;
   document.getElementById('myHand').textContent='✊';document.getElementById('oppHand').textContent='✊';
   document.getElementById('myHand').className='hand';document.getElementById('oppHand').className='hand';
   document.getElementById('vsBadge').textContent='VS';
-  document.getElementById('ovStart').classList.add('hidden');document.getElementById('ovResult').classList.add('hidden');
   document.getElementById('choicesArea').style.display='';
+  hide('awaitingWrap');
   updateHUD();renderRbar();updateChoicesHint();
+  setButtonsDisabled(false);
 }
 
-function updateChoicesHint(){document.getElementById('choicesHint').textContent='Round '+(G.round+1)+'/7 — Pick one! 🤜';}
+function updateChoicesHint(){
+  document.getElementById('choicesHint').textContent='Round '+(G.round+1)+'/'+TOTAL_ROUNDS+' — Pick one! 🤜';
+}
+
+function hide(id){document.getElementById(id).style.display='none';}
+function show(id){document.getElementById(id).style.display='';}
+
+function setButtonsDisabled(v){
+  document.querySelectorAll('.choice-btn').forEach(function(b){
+    if(v)b.classList.add('dis');
+    else b.classList.remove('dis','sel');
+  });
+}
 
 function pick(pc){
-  if(G.animating||G.phase!=='playing')return;
+  if(G.animating||G.phase!=='playing'||G.isLoading)return;
   G.animating=true;
+  G.isLoading=true;
+
   document.querySelectorAll('.choice-btn').forEach(function(b){b.classList.remove('sel');b.classList.add('dis');if(b.dataset.c===pc)b.classList.add('sel')});
-  var oc=randChoice();
+
   var my=document.getElementById('myHand'),op=document.getElementById('oppHand'),vs=document.getElementById('vsBadge');
   my.textContent='✊';op.textContent='✊';my.className='hand pump';op.className='hand pump';vs.textContent='⚡';
 
+  var actionId=genActionId();
+  postToHost({type:'GAME_ACTION',payload:{actionType:'play_turn',choice:pc},actionId:actionId});
+}
+
+function handleActionResult(d){
+  if(d.error){
+    G.animating=false;
+    G.isLoading=false;
+    setButtonsDisabled(false);
+    document.getElementById('vsBadge').textContent='VS';
+    document.getElementById('myHand').className='hand';
+    document.getElementById('oppHand').className='hand';
+    return;
+  }
+
+  var detail=d.detail||{};
+  var oc=detail.opponentChoice||'rock';
+  var roundResult=detail.roundResult||'draw';
+  var scoreDelta=detail.scoreDelta||0;
+  var newReward=d.rewardPreview||0;
+  var status=d.status;
+
   setTimeout(function(){
+    var my=document.getElementById('myHand'),op=document.getElementById('oppHand'),vs=document.getElementById('vsBadge');
+    var pc=detail.playerChoice||'rock';
     my.className='hand reveal';op.className='hand reveal';
     my.textContent=HANDS[pc];op.textContent=HANDS[oc];
-    var result=getWinner(pc,oc);
-    if(result==='win'){G.wins++;G.tickets+=WIN_TK;}
-    else if(result==='lose')G.losses++;
-    else G.draws++;
-    G.results.push(result);G.round++;
+
+    G.round=detail.roundAfter||G.round+1;
+    G.wins=detail.winsAfter||G.wins;
+    G.losses=detail.lossesAfter||G.losses;
+    G.draws=detail.drawsAfter||G.draws;
+    G.rewardPreview=newReward;
+    G.results.push(roundResult);
     updateHUD();renderRbar();
 
     setTimeout(function(){
       var bf=document.getElementById('bgflash'),ba=document.getElementById('battle');
-      if(result==='win'){my.className='hand winglow';bf.style.animation='bgFlashGreen .6s ease forwards';vs.textContent='🎉';spawnBurst('🎉');}
-      else if(result==='lose'){my.className='hand loseshake';bf.style.animation='bgFlashRed .6s ease forwards';vs.textContent='💥';ba.classList.add('shake');setTimeout(function(){ba.classList.remove('shake')},400);spawnBurst('💥');}
+      if(roundResult==='win'){my.className='hand winglow';bf.style.animation='bgFlashGreen .6s ease forwards';vs.textContent='🎉';spawnBurst('🎉');}
+      else if(roundResult==='lose'){my.className='hand loseshake';bf.style.animation='bgFlashRed .6s ease forwards';vs.textContent='💥';ba.classList.add('shake');setTimeout(function(){ba.classList.remove('shake')},400);spawnBurst('💥');}
       else{vs.textContent='🤝';}
       setTimeout(function(){bf.style.animation=''},600);
-      var rc=result==='win'?'#00e87a':result==='lose'?'#ff4757':'#ffc107';
-      var rt=result==='win'?'WIN! +'+WIN_TK+' 🎟️':result==='lose'?'LOSE':'DRAW!';
+      var rc=roundResult==='win'?'#00e87a':roundResult==='lose'?'#ff4757':'#ffc107';
+      var rt=roundResult==='win'?'WIN! +'+scoreDelta+' 🎟️':roundResult==='lose'?'LOSE '+scoreDelta:'DRAW!';
       showFloating(rt,rc,'round-result');
-      if(result==='win')showFloating('+'+WIN_TK,rc,'score-pop');
+      if(roundResult==='win')showFloating('+'+scoreDelta,rc,'score-pop');
     },200);
 
     setTimeout(function(){
-      vs.textContent='VS';G.animating=false;
-      document.querySelectorAll('.choice-btn').forEach(function(b){b.classList.remove('sel','dis')});
-      if(G.round>=ROUNDS){G.phase='result';document.getElementById('choicesArea').style.display='none';setTimeout(showResult,300);}
-      else updateChoicesHint();
+      vs.textContent='VS';G.animating=false;G.isLoading=false;
+      setButtonsDisabled(false);
+      if(status==='awaiting_finalize'){
+        G.phase='awaiting';
+        document.getElementById('choicesArea').style.display='none';
+        setTimeout(function(){enterAwaitingPhase()},300);
+      }else{
+        updateChoicesHint();
+      }
     },1200);
-  },1000);
+  },700);
+}
+
+function enterAwaitingPhase(){
+  show('awaitingWrap');
+  document.getElementById('awaitingText').textContent='🎉 '+G.rewardPreview+' tickets earned!';
+  if(G.wins>=Math.floor(TOTAL_ROUNDS*0.6))spawnConfetti(G.wins>=Math.floor(TOTAL_ROUNDS*0.8)?40:20);
+  postToHost({type:'GAME_OVER',rewardPreview:G.rewardPreview});
 }
 
 function spawnBurst(emoji){
@@ -258,59 +279,7 @@ function spawnConfetti(n){
   }
 }
 
-function showResult(){
-  var tk=G.tickets;
-  var winRate=((G.wins/ROUNDS)*100).toFixed(0);
-  var emoji='🎉',title='Game Over!',react='';
-  if(G.wins>=8){emoji='🤯';title='INCREDIBLE!';react='Almost perfect!';}
-  else if(G.wins>=6){emoji='🔥';title='AMAZING!';react='Great job!';}
-  else if(G.wins>=4){emoji='😊';title='NICE!';react='Not bad at all!';}
-  else if(G.wins>=2){emoji='🙂';title='OK!';react='Keep trying!';}
-  else{emoji='😅';title='Tough luck!';react='Better luck next time!';}
-
-  var h='<div class="ov-emoji">'+emoji+'</div>';
-  h+='<div class="ov-title">'+title+'</div>';
-  h+='<div style="font-size:13px;color:#88ccaa;line-height:1.7;margin-bottom:16px">'+react+'</div>';
-  // Big reward
-  var displayTk=tk>0?tk:1;
-  if(tk>0){
-    h+='<div class="reward-pill"><div class="reward-n">'+tk+'</div><div class="reward-lbl">🎟️ TICKETS</div></div>';
-  }else{
-    h+='<div class="reward-pill" style="background:linear-gradient(135deg,#668877,#88ccaa)"><div class="reward-n">+1</div><div class="reward-lbl">🎟️ BONUS TICKET</div></div>';
-  }
-  // Stats
-  h+='<div class="stats">';
-  h+='<div class="stat-row"><span class="stat-lbl">Wins</span><span class="stat-val" style="color:#00e87a">'+G.wins+'</span></div>';
-  h+='<div class="stat-row"><span class="stat-lbl">Draws</span><span class="stat-val" style="color:#ffc107">'+G.draws+'</span></div>';
-  h+='<div class="stat-row"><span class="stat-lbl">Losses</span><span class="stat-val" style="color:#ff4757">'+G.losses+'</span></div>';
-  h+='<div class="stat-row"><span class="stat-lbl">Win Rate</span><span class="stat-val" style="color:#fff">'+winRate+'%</span></div>';
-  h+='</div>';
-  // Button
-  if(tk>0){
-    h+='<button class="ov-btn" onclick="collectWithAd('+tk+')">📺 Collect '+tk+' Tickets</button>';
-  }else{
-    h+='<button class="ov-btn" onclick="collectWithAd(1)">📺 Get 1 Bonus Ticket</button>';
-  }
-
-  document.getElementById('resultBox').innerHTML=h;
-  document.getElementById('ovResult').classList.remove('hidden');
-  if(G.wins>=6)spawnConfetti(G.wins>=8?40:20);
-}
-
-function collectWithAd(amt){
-  showAd(function(){
-    G.totalTk+=amt;G.phase='start';
-    document.getElementById('ovResult').classList.add('hidden');
-    document.getElementById('ovStart').classList.remove('hidden');
-    document.getElementById('choicesArea').style.display='none';
-    document.getElementById('myHand').textContent='✊';document.getElementById('oppHand').textContent='✊';
-    document.getElementById('myHand').className='hand';document.getElementById('oppHand').className='hand';
-    document.getElementById('vsBadge').textContent='VS';
-    updateHUD();renderRbar();
-  });
-}
-
-updateHUD();renderRbar();
+renderRbar();
 </script>
 </body>
 </html>
