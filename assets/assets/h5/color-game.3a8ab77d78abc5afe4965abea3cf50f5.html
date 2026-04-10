@@ -16,7 +16,6 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
 .hdr-left{display:flex;align-items:center;gap:8px}
 .hdr-icon{width:30px;height:30px;border-radius:10px;background:linear-gradient(135deg,#e53935,#fdd835,#43a047,#1e88e5);font-size:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 10px rgba(255,215,0,.3)}
 .hdr-title{font-family:'Fredoka',sans-serif;font-size:20px;font-weight:700;color:#1a3a2f}
-.tk{display:flex;align-items:center;gap:4px;font-size:13px;font-weight:700}.tk em{font-style:normal;font-size:15px}.tk span{color:var(--gold)}
 .tracker{display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 14px;background:rgba(0,180,130,.04);border-bottom:1px solid rgba(0,180,130,.08)}
 .td{width:30px;height:30px;border-radius:50%;background:rgba(0,150,110,.06);border:2px solid rgba(0,150,110,.15);display:flex;align-items:center;justify-content:center;font-family:'Fredoka',sans-serif;font-size:12px;font-weight:600;color:var(--dim);transition:all .3s}
 .td.now{border-color:var(--cyan);color:var(--cyan);background:rgba(0,191,165,.1)}
@@ -109,8 +108,8 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
 </head>
 <body>
 <div class="app" id="app">
-<div class="hdr"><div class="hdr-left"><div class="hdr-icon">🎲</div><span class="hdr-title">Color Game</span></div><div class="tk"><em>🎟️</em> <span id="tkC">0</span></div></div>
-<div class="tracker"><div class="td" id="td0">1</div><div class="tl" id="tl0"></div><div class="td" id="td1">2</div><div class="tl" id="tl1"></div><div class="td" id="td2">3</div><div class="ttl" id="ttl">🎟️ 0</div></div>
+<div class="hdr"><div class="hdr-left"><div class="hdr-icon">🎲</div><span class="hdr-title">Color Game</span></div></div>
+<div class="tracker" id="tracker"></div>
 <div class="my-color" id="myColor"></div>
 <div class="dice-zone" id="diceZone">
   <div class="die-wrap" id="dw0"><div class="die-cube" id="dc0"></div><div class="die-badge" id="b0"></div></div>
@@ -121,7 +120,7 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
 <div class="payout"><div class="pay" id="p0"><div class="pm">0 match</div><div class="pr">💀</div></div><div class="pay" id="p1"><div class="pm">1 match</div><div class="pr">3 tix</div></div><div class="pay" id="p2"><div class="pm">2 match</div><div class="pr">8 tix</div></div><div class="pay" id="p3"><div class="pm">3 match</div><div class="pr">20 tix</div></div></div>
 <div class="board-area"><div class="blabel" id="bL">🎨 Pick your color!</div><div class="board" id="board"></div></div>
 <div class="bot"><div class="hint" id="hint">Pick your color!</div><div id="btns"><button class="btn btn-roll" id="btnR" onclick="roll()" disabled>🎲 ROLL!</button></div></div>
-<div class="ov" id="ovW"><div class="w-colors"><div class="w-dot c-red"></div><div class="w-dot c-blue"></div><div class="w-dot c-green"></div><div class="w-dot c-yellow"></div><div class="w-dot c-pink"></div><div class="w-dot c-orange"></div></div><div class="ov-title" style="color:var(--gold)">🎲 COLOR GAME</div><div class="ov-sub">Classic Perya — 3 Rounds!</div><div class="how"><div class="how-t">🎯 Paano Laruin</div><div class="how-s">🎨 Pick 1 of 6 colors<br>🎲 Roll 3 dice!<br>✅ Matches = Rewards!<br>🔄 3 rounds → Total!</div></div><button class="ov-btn ov-btn-gold" onclick="startGame()">LARO NA! 🎲</button></div>
+<div class="ov" id="ovW"><div class="w-colors"><div class="w-dot c-red"></div><div class="w-dot c-blue"></div><div class="w-dot c-green"></div><div class="w-dot c-yellow"></div><div class="w-dot c-pink"></div><div class="w-dot c-orange"></div></div><div class="ov-title" style="color:var(--gold)">🎲 COLOR GAME</div><div class="ov-sub" id="ovSubW">Classic Perya — 3 Rounds!</div><div class="how"><div class="how-t">🎯 Paano Laruin</div><div class="how-s">🎨 Pick 1 of 6 colors<br>🎲 Roll 3 dice!<br>✅ Matches = Rewards!<br>🔄 3 rounds → Total!</div></div><button class="ov-btn ov-btn-gold" onclick="startGame()">LARO NA! 🎲</button></div>
 <div class="ov hidden" id="ovF"><div class="ov-emoji" id="fE"></div><div class="ov-title" id="fT"></div><div class="ov-sub" id="fS"></div><div class="rb" id="fB"></div><div class="ov-reward" id="fR"></div><div class="ov-detail" id="fD"></div></div>
 </div>
 <script>
@@ -134,6 +133,7 @@ var COL=[
   {id:'orange',name:'Orange',css:'c-orange',hex:'#ff9800'}
 ];
 var RW=[0,3,8,20];
+var TOTAL_ROUNDS=3;
 var G={ph:'pick',rnd:0,sel:-1,rR:[],rM:[],tot:0,pendingRollResult:null};
 var pendingActionResolve=null;
 
@@ -157,6 +157,9 @@ window.addEventListener('message',function(e){
   try{
     var data=typeof e.data==='string'?JSON.parse(e.data):e.data;
     if(data.type==='HOST_CONFIG'){
+      var cfg=data.config||{};
+      if(typeof cfg.totalRounds==='number'&&cfg.totalRounds>=1)TOTAL_ROUNDS=cfg.totalRounds;
+      buildTracker();
     } else if(data.type==='HOST_ACTION_RESULT'&&pendingActionResolve){
       var fn=pendingActionResolve;
       pendingActionResolve=null;
@@ -232,10 +235,20 @@ function updateMyColor(){
   mc.innerHTML='<span class="my-color-label">My color →</span><div class="my-color-dot" style="background:'+COL[G.sel].hex+'"></div><span class="my-color-name">'+COL[G.sel].name+'</span>';
 }
 
+function buildTracker(){
+  var tr=document.getElementById('tracker');
+  var h='';
+  for(var i=0;i<TOTAL_ROUNDS;i++){
+    h+='<div class="td" id="td'+i+'">'+(i+1)+'</div>';
+    if(i<TOTAL_ROUNDS-1)h+='<div class="tl" id="tl'+i+'"></div>';
+  }
+  h+='<div class="ttl" id="ttl">🎫 0</div>';
+  tr.innerHTML=h;
+}
+
 function updateTracker(){
-  for(var i=0;i<3;i++){var d=document.getElementById('td'+i),l=document.getElementById('tl'+i);d.className='td';if(i<G.rnd){d.classList.add(G.rM[i]>0?'win':'lose');d.textContent=G.rM[i]>0?'+'+G.rR[i]:'✕';if(l)l.className='tl done'}else if(i===G.rnd){d.classList.add('now');d.textContent=i+1;if(l)l.className='tl'}else{d.textContent=i+1;if(l)l.className='tl'}}
-  var t=document.getElementById('ttl');t.textContent='🎟️ '+G.tot;t.classList.remove('bump');void t.offsetWidth;t.classList.add('bump');
-  document.getElementById('tkC').textContent=G.tot;
+  for(var i=0;i<TOTAL_ROUNDS;i++){var d=document.getElementById('td'+i),l=document.getElementById('tl'+i);d.className='td';if(i<G.rnd){d.classList.add(G.rM[i]>0?'win':'lose');d.textContent=G.rM[i]>0?'+'+G.rR[i]:'✕';if(l)l.className='tl done'}else if(i===G.rnd){d.classList.add('now');d.textContent=i+1;if(l)l.className='tl'}else{d.textContent=i+1;if(l)l.className='tl'}}
+  var t=document.getElementById('ttl');t.textContent='🎫 '+G.tot;t.classList.remove('bump');void t.offsetWidth;t.classList.add('bump');
 }
 
 function showServerError(msg){
@@ -328,9 +341,9 @@ function resolveRound(diceResults,matches,reward,chosenColor,status){
     var m=ci===chosenColor;
     h+='<div class="ms-dot" style="background:'+(m?COL[ci].hex+'33':'rgba(255,255,255,.05)')+';border-color:'+(m?COL[ci].hex:'rgba(255,255,255,.15)')+'">'+( m?'✓':'✕')+'</div>';
   });
-  if(matches===3)h+='<span class="ms-label" style="color:var(--gold)">TRIPLE! +20 🎟️</span>';
-  else if(matches===2)h+='<span class="ms-label" style="color:var(--gold)">DOUBLE! +8 🎟️</span>';
-  else if(matches===1)h+='<span class="ms-label" style="color:var(--green)">+3 🎟️</span>';
+  if(matches===3)h+='<span class="ms-label" style="color:var(--gold)">TRIPLE! +20 🎫</span>';
+  else if(matches===2)h+='<span class="ms-label" style="color:var(--gold)">DOUBLE! +8 🎫</span>';
+  else if(matches===1)h+='<span class="ms-label" style="color:var(--green)">+3 🎫</span>';
   else h+='<span class="ms-label" style="color:var(--red)">MISS!</span>';
   strip.innerHTML=h;
 
@@ -363,18 +376,18 @@ function showFinal(){
   document.getElementById('fB').innerHTML=G.rR.map(function(r,i){var m=G.rM[i];return'<div class="ri"><div class="rl">R'+(i+1)+'</div><div class="rv" style="color:'+(r>0?'var(--gold)':'var(--red)')+'">'+(r>0?'+'+r:'✕')+'</div><div class="rm">'+m+' match</div></div>'}).join('');
   if(t>=20){document.getElementById('fE').textContent='🏆';document.getElementById('fT').textContent='JACKPOT!';document.getElementById('fT').style.color='#ffd700';document.getElementById('fS').textContent='Malaking panalo!'}
   else if(t>=8){document.getElementById('fE').textContent='🔥';document.getElementById('fT').textContent='MAGALING!';document.getElementById('fT').style.color='#ffd700';document.getElementById('fS').textContent='Magaling ka!'}
-  else if(t>0){document.getElementById('fE').textContent='👍';document.getElementById('fT').textContent='NICE!';document.getElementById('fT').style.color='var(--green)';document.getElementById('fS').textContent='3 rounds total'}
-  else{document.getElementById('fE').textContent='😅';document.getElementById('fT').textContent='SAYANG!';document.getElementById('fT').style.color='var(--red)';document.getElementById('fS').textContent='All 3 rounds missed...'}
+  else if(t>0){document.getElementById('fE').textContent='👍';document.getElementById('fT').textContent='NICE!';document.getElementById('fT').style.color='var(--green)';document.getElementById('fS').textContent=TOTAL_ROUNDS+' rounds total'}
+  else{document.getElementById('fE').textContent='😅';document.getElementById('fT').textContent='SAYANG!';document.getElementById('fT').style.color='var(--red)';document.getElementById('fS').textContent='All '+TOTAL_ROUNDS+' rounds missed...'}
   var amt=t>0?t:1;
-  document.getElementById('fR').textContent=t>0?'+'+t+' 🎟️':'+1 🎟️';
+  document.getElementById('fR').textContent=t>0?'+'+t+' 🎫':'+1 🎫';
   document.getElementById('fD').textContent='';
   document.getElementById('ovF').classList.remove('hidden');
   if(t>=8)spawnConfetti(40);
 }
 
 function spawnConfetti(n){var app=document.getElementById('app');var cls=['#e53935','#1e88e5','#43a047','#fdd835','#e91e9f','#ff9800','#00bfa5'];for(var i=0;i<n;i++){var c=document.createElement('div');c.className='confetti';var sz=4+Math.random()*5,x=Math.random()*100,dur=1.2+Math.random()*1.5,dl=Math.random()*.5;c.style.cssText='left:'+x+'%;top:-10px;width:'+sz+'px;height:'+(sz*2.5)+'px;background:'+cls[0|Math.random()*cls.length]+';transform:rotate('+(Math.random()*360)+'deg);animation:confetti-fall '+dur+'s '+dl+'s ease-in forwards';app.appendChild(c);setTimeout((function(el){return function(){el.remove()}})(c),(dur+dl)*1000)}}
-function startGame(){document.getElementById('ovW').classList.add('hidden');G.ph='pick';G.rnd=0;G.sel=-1;G.rR=[];G.rM=[];G.tot=0;initDice();updateTracker();renderBoard();updateMyColor();document.getElementById('matchStrip').innerHTML='';document.getElementById('bL').textContent='🎨 Pick your color!';document.getElementById('hint').textContent='Pick your color!';document.getElementById('btnR').disabled=true;document.querySelectorAll('.pay').forEach(function(p){p.classList.remove('hit')})}
-initDice();renderBoard();updateTracker();
+function startGame(){document.getElementById('ovW').classList.add('hidden');document.getElementById('ovSubW').textContent='Classic Perya — '+TOTAL_ROUNDS+' Rounds!';G.ph='pick';G.rnd=0;G.sel=-1;G.rR=[];G.rM=[];G.tot=0;buildTracker();initDice();updateTracker();renderBoard();updateMyColor();document.getElementById('matchStrip').innerHTML='';document.getElementById('bL').textContent='🎨 Pick your color!';document.getElementById('hint').textContent='Pick your color!';document.getElementById('btnR').disabled=true;document.querySelectorAll('.pay').forEach(function(p){p.classList.remove('hit')})}
+buildTracker();initDice();renderBoard();updateTracker();
 </script>
 </body>
 </html>

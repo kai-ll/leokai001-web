@@ -237,10 +237,6 @@
     <span class="kv-label">maxReward</span>
     <span class="kv-value" id="cfg-maxReward">—</span>
   </div>
-  <div class="kv-row" style="border-bottom:none">
-    <span class="kv-label">minReward</span>
-    <span class="kv-value" id="cfg-minReward">—</span>
-  </div>
 </div>
 
 <div class="card">
@@ -294,7 +290,7 @@
 </div>
 
 <div class="awaiting-banner" id="awaitingBanner">
-  status: awaiting_finalize — sending GAME_OVER automatically...
+  status: awaiting_finalize — host will transition to reward step
 </div>
 
 <div class="error-banner" id="errorBanner">
@@ -331,10 +327,6 @@
 <div class="section">
   <div class="section-title">Other Messages</div>
   <div class="btn-grid-2">
-    <button class="btn btn-gameover" onclick="sendGameOver()">
-      <span class="btn-icon">🏁</span>
-      GAME_OVER
-    </button>
     <button class="btn btn-error" onclick="sendError()">
       <span class="btn-icon">⚠️</span>
       GAME_ERROR
@@ -436,10 +428,6 @@
     post({ type: 'GAME_ACTION', payload: { choice: choice }, actionId: actionId });
   }
 
-  function sendGameOver() {
-    post({ type: 'GAME_OVER', rewardPreview: lastRewardPreview });
-  }
-
   function sendError() {
     post({ type: 'GAME_ERROR', message: 'Test error from H5 game' });
   }
@@ -530,7 +518,6 @@
         hostConfig = d.config || {};
         document.getElementById('cfg-gameType').textContent = hostConfig.gameType || '—';
         document.getElementById('cfg-maxReward').textContent = hostConfig.maxReward !== undefined ? hostConfig.maxReward : '—';
-        document.getElementById('cfg-minReward').textContent = hostConfig.minReward !== undefined ? hostConfig.minReward : '—';
         if (hostConfig.totalRounds && !gameStarted) {
           totalRounds = hostConfig.totalRounds;
           document.getElementById('roundsDisplay').textContent = totalRounds;

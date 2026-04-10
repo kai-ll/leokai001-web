@@ -14,8 +14,6 @@ body{font-family:'DM Sans',sans-serif;background:#F7F9FB;color:#1a3a2f;min-heigh
 .hdr-ico{width:34px;height:34px;border-radius:9px;background:linear-gradient(140deg,#00bfa5,#009688);display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 2px 8px rgba(0,191,165,.3)}
 .hdr-t{font-size:14px;font-weight:800;color:#1a3a2f;line-height:1.2}
 .hdr-sub{font-size:9px;font-weight:700;color:#00bfa5;letter-spacing:.04em}
-.hdr-badge{display:flex;align-items:center;gap:4px;background:#eafaf1;border:1.5px solid rgba(0,191,165,.15);border-radius:18px;padding:4px 10px}
-.hdr-badge span{font-size:13px;font-weight:800;color:#009688;font-family:'JetBrains Mono',monospace}
 
 .page{flex:1;display:flex;flex-direction:column;align-items:center;padding:16px 20px 28px;justify-content:center;animation:up .35s ease-out}
 
@@ -118,7 +116,6 @@ body{font-family:'DM Sans',sans-serif;background:#F7F9FB;color:#1a3a2f;min-heigh
     <div class="hdr-ico">🪙</div>
     <div><div class="hdr-t">Coin Flip</div><div class="hdr-sub">by StepPot</div></div>
   </div>
-  <div class="hdr-badge"><span style="font-size:12px">🎟️</span><span id="tkDisplay">—</span></div>
 </div>
 
 <!-- HOME -->
@@ -332,7 +329,7 @@ function updateRewardUI() {
   if (G.rewardPreview > 0 && G.phase !== 'wrong' && G.phase !== 'awaiting') {
     var maxR = hostConfig.maxReward || 1024;
     var next = Math.min(G.rewardPreview * 2, maxR);
-    nxt.textContent = next > G.rewardPreview ? 'next win → ' + next + ' 🎟️' : '';
+    nxt.textContent = next > G.rewardPreview ? 'next win → ' + next + ' 🎫' : '';
   } else {
     nxt.textContent = '';
   }
@@ -382,7 +379,6 @@ function handleHostConfig(cfg) {
   hostConfig = cfg;
   if (typeof cfg.maxRevives === 'number') MAX_REVIVES = cfg.maxRevives;
   if (typeof cfg.consolation === 'number') CONSOLATION = cfg.consolation;
-  document.getElementById('tkDisplay').textContent = cfg.rewardPreview !== undefined ? cfg.rewardPreview : '—';
   if (G.phase === 'home') {
     show('screenHome');
   }
@@ -491,7 +487,7 @@ function applyFlipResult(d) {
         setTimeout(enterPickPhase, 1400);
       } else if (outcome === 'win' || outcome === 'continue') {
         bumpReward();
-        showToast('🎟️ ' + G.rewardPreview, 'win', 1200);
+        showToast('🎫 ' + G.rewardPreview, 'win', 1200);
         updateRewardUI();
         if (status === 'awaiting_finalize') {
           enterAwaitingPhase();
@@ -510,7 +506,7 @@ function applyFlipResult(d) {
         if (G.pendingRevive) {
           enterWrongPhase();
         } else {
-          enterAwaitingPhase();
+          enterAwaitingPhase(true);
         }
       }
       setLoading(false);
@@ -522,9 +518,9 @@ function applyFlipResult(d) {
 function enterWrongPhase() {
   G.phase = 'wrong';
   hide('picksWrap'); hide('awaitingWrap'); show('wrongWrap');
-  document.getElementById('wrongTitle').textContent = G.rewardPreview > 0 ? 'Lost ' + G.rewardPreview + ' 🎟️' : 'No luck!';
-  document.getElementById('reviveBtn').textContent = '📺 Watch Ad & Continue (' + G.revivesLeft + ' left)';
-  document.getElementById('giveupBtn').textContent = 'Give Up (+' + CONSOLATION + ' consolation 🎟️)';
+  document.getElementById('wrongTitle').textContent = G.rewardPreview > 0 ? 'Lost ' + G.rewardPreview + ' 🎫' : 'No luck!';
+  document.getElementById('reviveBtn').textContent = 'Second Chance';
+  document.getElementById('giveupBtn').textContent = 'Collect +1 ticket';
   setLoading(false);
 }
 
@@ -551,14 +547,22 @@ function doStop() {
 }
 
 // ── Awaiting phase (host will transition to reward step) ──────────────
-function enterAwaitingPhase() {
+function enterAwaitingPhase(isLost) {
   G.phase = 'awaiting';
   hide('picksWrap'); hide('wrongWrap'); show('awaitingWrap');
-  document.getElementById('awaitingText').textContent = '🎉 ' + G.rewardPreview + ' tickets ready to claim!';
-  spawnConfetti();
+  var el = document.getElementById('awaitingWrap');
+  if (isLost) {
+    var lostAmt = G.rewardPreview;
+    var h = '<div style="font-size:56px;margin-bottom:8px">' + (lostAmt > 0 ? '😱' : '🪙') + '</div>';
+    h += '<h2 style="font-size:24px;font-weight:900;margin-bottom:8px;color:' + (lostAmt > 0 ? '#c0392b' : '#64748b') + '">' + (lostAmt > 0 ? 'So close!' : 'Better luck next time!') + '</h2>';
+    h += '<div style="display:inline-block;padding:6px 18px;border-radius:20px;background:#FFF3CD;color:#C07800;font-size:14px;font-weight:700;border:1.5px solid #F0A500">+' + CONSOLATION + ' bonus ticket</div>';
+    el.innerHTML = h;
+  } else {
+    el.innerHTML = '<div class="awaiting-text">🎉 ' + G.rewardPreview + ' tickets ready to claim!</div>';
+    spawnConfetti();
+  }
   updateRewardUI();
   setLoading(false);
-  postToHost({ type: 'GAME_OVER', rewardPreview: G.rewardPreview });
 }
 
 // ── HOST_ACTION_RESULT handler ────────────────────────────────────────
@@ -593,9 +597,10 @@ function handleActionResult(d) {
     updateRewardUI();
     setTimeout(enterPickPhase, 300);
   } else if (d.status === 'awaiting_finalize') {
+    var wasLost = G.phase === 'wrong' || d.outcome === 'lose';
     G.rewardPreview = d.rewardPreview || 0;
     updateRewardUI();
-    enterAwaitingPhase();
+    enterAwaitingPhase(wasLost);
   }
 }
 

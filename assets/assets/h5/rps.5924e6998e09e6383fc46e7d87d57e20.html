@@ -73,7 +73,7 @@ body{font-family:'DM Sans',sans-serif;background:#e8f5f0;color:#1a3a2f;min-heigh
 
 <div class="hud">
   <div class="hud-left"><div class="hud-ico">🤜</div><span class="hud-title">Bato Bato Pick</span></div>
-  <div class="hud-tk">🎟️ <span class="hud-tk-n" id="hudTk">0</span></div>
+  <div class="hud-tk">🎫 <span class="hud-tk-n" id="hudTk">0</span></div>
 </div>
 
 <div class="rbar" id="rbar"></div>
@@ -104,8 +104,10 @@ body{font-family:'DM Sans',sans-serif;background:#e8f5f0;color:#1a3a2f;min-heigh
 var HANDS={rock:'✊',scissors:'✌️',paper:'🖐️'};
 
 var hostConfig={};
-var TOTAL_ROUNDS=5;
-var WIN_REWARD=20;
+var TOTAL_ROUNDS=10;
+var WIN_REWARD=3;
+var LOSE_REWARD=0;
+var DRAW_REWARD=1;
 
 var G={round:0,wins:0,losses:0,draws:0,rewardPreview:0,results:[],animating:false,phase:'waiting',isLoading:false};
 var actionSeq=0;
@@ -137,6 +139,8 @@ function handleHostConfig(cfg){
   hostConfig=cfg;
   if(typeof cfg.totalRounds==='number')TOTAL_ROUNDS=cfg.totalRounds;
   if(typeof cfg.winReward==='number')WIN_REWARD=cfg.winReward;
+  if(typeof cfg.loseReward==='number')LOSE_REWARD=cfg.loseReward;
+  if(typeof cfg.drawReward==='number')DRAW_REWARD=cfg.drawReward;
   document.getElementById('hudTk').textContent=cfg.rewardPreview!==undefined?cfg.rewardPreview:'0';
   startGame();
 }
@@ -232,7 +236,7 @@ function handleActionResult(d){
       else{vs.textContent='🤝';}
       setTimeout(function(){bf.style.animation=''},600);
       var rc=roundResult==='win'?'#00e87a':roundResult==='lose'?'#ff4757':'#ffc107';
-      var rt=roundResult==='win'?'WIN! +'+scoreDelta+' 🎟️':roundResult==='lose'?'LOSE '+scoreDelta:'DRAW!';
+      var rt=roundResult==='win'?'WIN! +'+scoreDelta+' 🎫':roundResult==='lose'?'LOSE '+scoreDelta:scoreDelta>0?'DRAW +'+scoreDelta+' 🎫':'DRAW!';
       showFloating(rt,rc,'round-result');
       if(roundResult==='win')showFloating('+'+scoreDelta,rc,'score-pop');
     },200);
@@ -255,7 +259,6 @@ function enterAwaitingPhase(){
   show('awaitingWrap');
   document.getElementById('awaitingText').textContent='🎉 '+G.rewardPreview+' tickets earned!';
   if(G.wins>=Math.floor(TOTAL_ROUNDS*0.6))spawnConfetti(G.wins>=Math.floor(TOTAL_ROUNDS*0.8)?40:20);
-  postToHost({type:'GAME_OVER',rewardPreview:G.rewardPreview});
 }
 
 function spawnBurst(emoji){

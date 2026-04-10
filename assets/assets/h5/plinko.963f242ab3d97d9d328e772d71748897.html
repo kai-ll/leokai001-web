@@ -14,7 +14,6 @@ body{font-family:'Nunito',sans-serif;background:#F0FAF5;color:#1B2E4A}
 .hl{display:flex;align-items:center;gap:10px}
 .hi{width:34px;height:34px;border-radius:11px;background:#A855F7;display:flex;align-items:center;justify-content:center;font-size:16px}
 .hn{font-family:Fredoka;font-size:20px;font-weight:700;color:#fff}
-.tp{display:flex;align-items:center;gap:5px;padding:5px 12px;border-radius:18px;background:rgba(255,184,0,.15);border:1.5px solid rgba(255,184,0,.3);font-family:Fredoka;font-weight:700;font-size:14px;color:#FFB800}
 .nfo{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;margin:8px 12px 0;border-radius:14px;background:#fff;box-shadow:0 2px 8px rgba(27,46,74,.08);flex-shrink:0}
 .nl{display:flex;align-items:baseline;gap:5px;font-family:Fredoka}
 .nlb{font-size:12px;color:#5A7388}.nn{font-size:26px;font-weight:700;color:#9A6800}.nu{font-size:12px;color:#5A7388;font-weight:600}
@@ -48,7 +47,7 @@ canvas{border-radius:16px;display:block;touch-action:none;box-shadow:0 2px 12px 
 </head>
 <body>
 <div class="root">
-  <div class="hdr"><div class="hl"><div class="hi">🎱</div><span class="hn">Plinko</span></div><div class="tp">🎟️ <span id="tk">0</span></div></div>
+  <div class="hdr"><div class="hl"><div class="hi">🎱</div><span class="hn">Plinko</span></div></div>
   <div class="nfo"><div class="nl"><span class="nlb">Total</span><span class="nn" id="tot">0</span><span class="nu">tickets</span></div><div class="nr"><span class="dlb">Drop</span><div class="dds" id="dots"></div></div></div>
   <div class="cw" id="cw"><canvas id="cv"></canvas></div>
   <div class="bot"><div class="chips hidden" id="ch"></div><div class="hint" id="ht">🎱 Slide to aim, tap to drop!</div></div>
@@ -60,7 +59,7 @@ canvas{border-radius:16px;display:block;touch-action:none;box-shadow:0 2px 12px 
       <div class="wr"><span>👆</span><span>Slide to aim, tap to drop</span></div>
       <div class="wr"><span>📍</span><span>Ball bounces through pins into slots</span></div>
       <div class="wr"><span>⚡</span><span>Red = bouncer! Blue = warp!</span></div>
-      <div class="wr"><span>🎟️</span><span>3 drops per game</span></div>
+      <div class="wr"><span>🎫</span><span>3 drops per game</span></div>
     </div>
     <button class="btn bp" id="btnStart">SUGOD NA! 🎱</button>
   </div>
@@ -94,7 +93,7 @@ var VB={5:'rgba(255,184,0,.18)',3:'rgba(245,158,11,.14)',1:'rgba(251,146,60,.1)'
 
 var pins=[],slots=[],ball=null,phase='idle',dn=0,res=[],total=0,tix=0,lslot=-1,aimX=-1,touch=false,raf=0;
 var pendingActionResolve=null;
-var maxReward=20,minReward=0;
+var maxReward=20;
 var lastRewardPreview=0;
 
 function postToHost(msg){
@@ -110,7 +109,7 @@ window.addEventListener('message',function(e){
     if(data.type==='HOST_CONFIG'){
       if(data.config){
         if(typeof data.config.maxReward==='number')maxReward=data.config.maxReward;
-        if(typeof data.config.minReward==='number')minReward=data.config.minReward;
+        if(typeof data.config.totalDrops==='number'&&data.config.totalDrops>=1)DROPS=data.config.totalDrops;
       }
     }else if(data.type==='HOST_ACTION_RESULT'&&pendingActionResolve){
       var fn=pendingActionResolve;
@@ -297,8 +296,7 @@ function onLand(){
   document.getElementById('ht').textContent='⏳ Sending score...';
 
   sendScore(v).then(function(result){
-    lastRewardPreview=typeof result.rewardPreview==='number'?result.rewardPreview:Math.max(minReward,Math.min(total,maxReward));
-    document.getElementById('tk').textContent=lastRewardPreview;
+    lastRewardPreview=typeof result.rewardPreview==='number'?result.rewardPreview:Math.min(total,maxReward);
 
     if(dn>=DROPS){
       phase='done';
@@ -310,8 +308,7 @@ function onLand(){
       },500);
     }
   }).catch(function(){
-    lastRewardPreview=Math.max(minReward,Math.min(total,maxReward));
-    document.getElementById('tk').textContent=lastRewardPreview;
+    lastRewardPreview=Math.min(total,maxReward);
 
     if(dn>=DROPS){
       phase='done';
@@ -382,7 +379,6 @@ function startGame(){
   if(raf){cancelAnimationFrame(raf);raf=0}
   pins=mkPins();slots=shuffle(SLOTS);ball=null;aimX=-1;
   phase='idle';dn=0;res=[];total=0;lslot=-1;touch=false;lastRewardPreview=0;
-  document.getElementById('tk').textContent='0';
   sov(null);ui();raf=requestAnimationFrame(loop);
 }
 

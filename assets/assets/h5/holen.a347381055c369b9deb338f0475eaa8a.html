@@ -53,7 +53,7 @@ canvas{width:100%;height:100%;display:block}
 </head>
 <body>
 <div class="app" id="app">
-<div class="hdr"><div class="hdr-l"><div class="hdr-ico"></div><span class="hdr-t">Holen</span></div><div class="tk-d">🎟️ <span id="tkC">0</span></div></div>
+<div class="hdr"><div class="hdr-l"><div class="hdr-ico"></div><span class="hdr-t">Holen</span></div><div class="tk-d">🎫 <span id="tkC">0</span></div></div>
 <div class="shots" id="shots"></div>
 <div class="ga" id="ga"><canvas id="cv"></canvas></div>
 <div class="bot"><div class="hint" id="hint">🎯 Pull back &amp; shoot!</div></div>
@@ -70,18 +70,18 @@ canvas{width:100%;height:100%;display:block}
 </div>
 <div class="ov-title" style="color:#00897b">🔮 HOLEN</div>
 <div class="ov-sub">Classic Filipino Marble Game!</div>
-<div class="how"><div class="how-t">🎯 How to Play</div><div class="how-s">🎯 Pull back to aim &amp; shoot!<br>💎 Knock marbles out of the ring!<br>⭐ Big numbers = more tickets!<br>🧱 Gray walls = blockers!<br>🔫 3 shots per round!</div></div>
+<div class="how"><div class="how-t">🎯 How to Play</div><div class="how-s">🎯 Pull back to aim &amp; shoot!<br>💎 Knock marbles out of the ring!<br>⭐ Big numbers = more tickets!<br>🧱 Gray walls = blockers!<br>🔫 <span id="shotInfo">3</span> shots per round!</div></div>
 <button class="ov-btn ov-btn-gold" id="btnBegin">LET'S PLAY! 🎯</button>
 </div>
 </div>
 <script>
-var TIX=[1,1,1,2,3,5,8],WALLS=5,SHOTS=3,FRIC=0.965;
+var TIX=[1,1,1,2,3,5,8],WALLS=5,SHOTS=3,FRIC=0.965,CONFIGURED_SHOTS=false;
 var MCOL=[{m:'#e53935',l:'#ff8a80',d:'#b71c1c'},{m:'#42a5f5',l:'#90caf9',d:'#0d47a1'},{m:'#66bb6a',l:'#a5d6a7',d:'#1b5e20'},{m:'#ffd600',l:'#fff176',d:'#f57f17'},{m:'#ec407a',l:'#f48fb1',d:'#880e4f'},{m:'#26c6da',l:'#80deea',d:'#00838f'},{m:'#ffa726',l:'#ffcc80',d:'#e65100'}];
 var WCOL={m:'#78909c',l:'#b0bec5',d:'#37474f'},PCOL={m:'#fff',l:'#ffffff',d:'#b0bec5'};
 var cv=document.getElementById('cv'),ctx=cv.getContext('2d'),W=0,H=0,dpr=1;
 var S={ph:'idle',shot:0,tot:0,prevTot:0,shotScores:[],lastRewardPreview:0,cir:{x:0,y:0,r:0},player:null,tgts:[],wm:[],pts:[],ds:null,dn:null,fired:false};
 var pendingActionResolve=null;
-var maxReward=20,minReward=1;
+var maxReward=20;
 
 function postToHost(msg){
   var s=JSON.stringify(msg);
@@ -96,7 +96,11 @@ window.addEventListener('message',function(e){
     if(data.type==='HOST_CONFIG'){
       if(data.config){
         if(typeof data.config.maxReward==='number')maxReward=data.config.maxReward;
-        if(typeof data.config.minReward==='number')minReward=data.config.minReward;
+        if(typeof data.config.totalRounds==='number'&&data.config.totalRounds>0){
+          SHOTS=data.config.totalRounds;
+          CONFIGURED_SHOTS=true;
+          var si=document.getElementById('shotInfo');if(si)si.textContent=SHOTS;
+        }
       }
     } else if(data.type==='HOST_ACTION_RESULT'&&pendingActionResolve){
       var fn=pendingActionResolve;
@@ -144,14 +148,14 @@ function mkM(x,y,r,col,tk,tp){var ms=tp==='wall'?2:tp==='player'?1.2:0.5+tk*0.25
 
 function updM(m){
   m.x+=m.vx;m.y+=m.vy;m.vx*=FRIC;m.vy*=FRIC;
-  if(m.x-m.r<0){m.x=m.r;m.vx*=-.4}if(m.x+m.r>W){m.x=W-m.r;m.vx*=-.4}
-  if(m.y-m.r<0){m.y=m.r;m.vy*=-.4}if(m.y+m.r>H){m.y=H-m.r;m.vy*=-.4}
+  if(m.x-m.r<0){m.x=m.r;m.vx*=-1}if(m.x+m.r>W){m.x=W-m.r;m.vx*=-1}
+  if(m.y-m.r<0){m.y=m.r;m.vy*=-1}if(m.y+m.r>H){m.y=H-m.r;m.vy*=-1}
   if(m.imp>0){m.imp-=.04;m.scale=1+m.imp*.25}else m.scale=1;
   var c=S.cir,dx=m.x-c.x,dy=m.y-c.y,dist=Math.sqrt(dx*dx+dy*dy);
   if((m.tp==='reward'||m.tp==='wall')&&!m.out&&dist>c.r+m.r*.5){
     m.out=true;
     if(m.tp==='reward'&&!m.sc){m.sc=true;S.tot+=m.tk;document.getElementById('tkC').textContent=S.tot;
-      mkFlt(m.x,m.y-15,'+'+m.tk+' 🎟️','#e8a800',22);
+      mkFlt(m.x,m.y-15,'+'+m.tk+' 🎫','#e8a800',22);
       mkSp(m.x,m.y,m.col.m,14);mkSp(m.x,m.y,'#ffd700',8);
       var ap=document.getElementById('app');ap.classList.remove('sk');void ap.offsetWidth;ap.classList.add('sk');
     }
@@ -298,14 +302,15 @@ function draw(){
       var isLast=S.shot>=SHOTS;
       S.ph='sending';
       sendScore(shotScore).then(function(result){
-        S.lastRewardPreview=typeof result.rewardPreview==='number'?result.rewardPreview:Math.max(minReward,Math.min(S.tot,maxReward));
-        if(isLast){
+        S.lastRewardPreview=typeof result.rewardPreview==='number'?result.rewardPreview:Math.min(S.tot,maxReward);
+        var serverDone=result.status==='awaiting_finalize';
+        if(isLast||serverDone){
           setTimeout(showRoundSummary,300);
         }else{
           setTimeout(function(){resetP();S.ph='aim';document.getElementById('hint').textContent='Shot '+(S.shot+1)+'/'+SHOTS+' — Pull back!'},300);
         }
       }).catch(function(){
-        S.lastRewardPreview=Math.max(minReward,Math.min(S.tot,maxReward));
+        S.lastRewardPreview=Math.min(S.tot,maxReward);
         if(isLast){
           setTimeout(showRoundSummary,300);
         }else{
