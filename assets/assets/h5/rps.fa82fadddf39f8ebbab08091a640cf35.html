@@ -110,10 +110,6 @@ var LOSE_REWARD=0;
 var DRAW_REWARD=1;
 
 var G={round:0,wins:0,losses:0,draws:0,rewardPreview:0,results:[],animating:false,phase:'waiting',isLoading:false};
-var actionSeq=0;
-
-function genActionId(){return 'rps_'+Date.now()+'_'+(++actionSeq);}
-
 function postToHost(obj){
   var str=JSON.stringify(obj);
   if(window.ReactNativeWebView){
@@ -193,8 +189,7 @@ function pick(pc){
   var my=document.getElementById('myHand'),op=document.getElementById('oppHand'),vs=document.getElementById('vsBadge');
   my.textContent='✊';op.textContent='✊';my.className='hand pump';op.className='hand pump';vs.textContent='⚡';
 
-  var actionId=genActionId();
-  postToHost({type:'GAME_ACTION',payload:{actionType:'play_turn',choice:pc},actionId:actionId});
+  postToHost({type:'GAME_ACTION',payload:{actionType:'play_turn',choice:pc}});
 }
 
 function handleActionResult(d){

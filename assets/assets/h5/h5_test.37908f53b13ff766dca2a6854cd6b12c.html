@@ -354,10 +354,6 @@
     document.getElementById('roundsDisplay').textContent = totalRounds;
   }
 
-  function genActionId() {
-    return Date.now() + '_' + Math.random().toString(36).slice(2, 9);
-  }
-
   function post(obj) {
     var str = JSON.stringify(obj);
     log('SENT: ' + str, 'sent');
@@ -412,8 +408,7 @@
     if (actionPending) return;
     actionPending = true;
     setActionButtonsDisabled(true);
-    var actionId = genActionId();
-    post({ type: 'GAME_ACTION', payload: { finish: true }, actionId: actionId });
+    post({ type: 'GAME_ACTION', payload: { finish: true } });
   }
 
   function sendAction(choice) {
@@ -424,8 +419,7 @@
     if (!document.getElementById('progressWrap').style.display || document.getElementById('progressWrap').style.display === 'none') {
       initProgress();
     }
-    var actionId = genActionId();
-    post({ type: 'GAME_ACTION', payload: { choice: choice }, actionId: actionId });
+    post({ type: 'GAME_ACTION', payload: { choice: choice } });
   }
 
   function sendError() {

@@ -214,12 +214,9 @@ var G = {
 var CONSOLATION = 1;
 var MAX_REVIVES = 2; // fallback, overridden by HOST_CONFIG
 var flipIv = null;
-var actionSeq = 0;
 var pendingFlipResult = null;
 var flipAnimReady = false;
 var FLIP_MIN_MS = 2000;
-
-function genActionId() { return 'cf_' + Date.now() + '_' + (++actionSeq); }
 
 // ── postMessage bridge ────────────────────────────────────────────────
 function postToHost(obj) {
@@ -448,11 +445,10 @@ function doFlip() {
     }
   }, FLIP_MIN_MS);
 
-  var actionId = genActionId();
   var choice = G.selectedSide;
 
   setTimeout(function () {
-    postToHost({ type: 'GAME_ACTION', payload: { actionType: 'play_turn', choice: choice }, actionId: actionId });
+    postToHost({ type: 'GAME_ACTION', payload: { actionType: 'play_turn', choice: choice } });
   }, 100);
 }
 
@@ -527,23 +523,20 @@ function enterWrongPhase() {
 function doRevive() {
   if (G.isLoading) return;
   setLoading(true);
-  var actionId = genActionId();
-  postToHost({ type: 'GAME_ACTION', payload: { actionType: 'revive' }, actionId: actionId });
+  postToHost({ type: 'GAME_ACTION', payload: { actionType: 'revive' } });
 }
 
 function doGiveUp() {
   if (G.isLoading) return;
   setLoading(true);
-  var actionId = genActionId();
-  postToHost({ type: 'GAME_ACTION', payload: { actionType: 'give_up' }, actionId: actionId });
+  postToHost({ type: 'GAME_ACTION', payload: { actionType: 'give_up' } });
 }
 
 // ── Stop & Collect ────────────────────────────────────────────────────
 function doStop() {
   if (G.isLoading || G.rewardPreview === 0) return;
   setLoading(true);
-  var actionId = genActionId();
-  postToHost({ type: 'GAME_ACTION', payload: { actionType: 'stop_collect' }, actionId: actionId });
+  postToHost({ type: 'GAME_ACTION', payload: { actionType: 'stop_collect' } });
 }
 
 // ── Awaiting phase (host will transition to reward step) ──────────────

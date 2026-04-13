@@ -112,7 +112,6 @@ window.addEventListener('message',function(e){
 
 function sendScore(score){
   return new Promise(function(resolve,reject){
-    var actionId='holen_'+Date.now()+'_'+Math.random().toString(36).slice(2);
     pendingActionResolve=function(result){
       if(result.outcome==='noop'&&result.status==='in_progress'&&result.rewardPreview===0&&result.roll===0){
         reject(new Error('Server error'));
@@ -120,7 +119,7 @@ function sendScore(score){
         resolve(result);
       }
     };
-    postToHost({type:'GAME_ACTION',payload:{score:score,tixKnocked:score},actionId:actionId});
+    postToHost({type:'GAME_ACTION',payload:{score:score,tixKnocked:score}});
     setTimeout(function(){
       if(pendingActionResolve){
         pendingActionResolve=null;

@@ -170,7 +170,6 @@ window.addEventListener('message',function(e){
 
 function sendAction(chosenColor){
   return new Promise(function(resolve,reject){
-    var actionId='color_'+Date.now()+'_'+Math.random().toString(36).slice(2);
     pendingActionResolve=function(result){
       if(result.outcome==='noop'&&result.status==='in_progress'&&result.rewardPreview===0&&result.roll===0){
         reject(new Error('Server error'));
@@ -178,7 +177,7 @@ function sendAction(chosenColor){
         resolve(result);
       }
     };
-    postToHost({type:'GAME_ACTION',payload:{choice:String(chosenColor)},actionId:actionId});
+    postToHost({type:'GAME_ACTION',payload:{choice:String(chosenColor)}});
     setTimeout(function(){
       if(pendingActionResolve){
         pendingActionResolve=null;

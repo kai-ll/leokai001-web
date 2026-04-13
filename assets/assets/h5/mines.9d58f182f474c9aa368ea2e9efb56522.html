@@ -242,15 +242,12 @@ var hitIdx = -1;
 var boardRevealed = false;
 var isLoading = false;
 var loadingCell = -1;
-var actionSeq = 0;
 var revealedBoard = null;
 
 var $ = function(id) { return document.getElementById(id); };
 var grid = $('grid');
 var hint = $('hint');
 var mainBtn = $('mainBtn');
-
-function genActionId() { return 'mines_' + Date.now() + '_' + (++actionSeq); }
 
 function postToHost(obj) {
   var str = JSON.stringify(obj);
@@ -275,6 +272,9 @@ window.addEventListener('message', function(e) {
 
 function handleHostConfig(cfg) {
   hostConfig = cfg;
+  if (typeof cfg.mineCount === 'number') {
+    GEMS_COUNT = TOTAL - cfg.mineCount;
+  }
   if (phase === 'home') {
     showOverlay('ovWelcome');
   }
@@ -458,11 +458,9 @@ function onTap(idx) {
   loadingCell = idx;
   updateCellLoading(idx);
 
-  var actionId = genActionId();
   postToHost({
     type: 'GAME_ACTION',
-    payload: { actionType: 'play_turn', tileIndex: idx },
-    actionId: actionId
+    payload: { actionType: 'play_turn', tileIndex: idx }
   });
 }
 
@@ -470,22 +468,18 @@ function cashOut() {
   if (phase !== 'playing' || collected <= 0 || isLoading) return;
   setLoading(true);
   mainBtn.disabled = true;
-  var actionId = genActionId();
   postToHost({
     type: 'GAME_ACTION',
-    payload: { actionType: 'stop_collect' },
-    actionId: actionId
+    payload: { actionType: 'stop_collect' }
   });
 }
 
 function useShield() {
   if (isLoading) return;
   setLoading(true);
-  var actionId = genActionId();
   postToHost({
     type: 'GAME_ACTION',
-    payload: { actionType: 'revive' },
-    actionId: actionId
+    payload: { actionType: 'revive' }
   });
 }
 
@@ -494,11 +488,9 @@ function acceptDeath() {
   if (isLoading) return;
   setLoading(true);
   lastSentAction = 'give_up';
-  var actionId = genActionId();
   postToHost({
     type: 'GAME_ACTION',
-    payload: { actionType: 'give_up' },
-    actionId: actionId
+    payload: { actionType: 'give_up' }
   });
 }
 
