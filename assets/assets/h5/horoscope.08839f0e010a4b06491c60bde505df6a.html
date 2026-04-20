@@ -649,7 +649,20 @@ function enterApp() {
 }
 
 function goBack() {
-  // Always return to the intro (birthday input) screen on both web and native WebView.
+  // Close the host modal on both web (iframe parent) and native (ReactNativeWebView).
+  var msg = JSON.stringify({ type: 'GO_HOME' });
+  if (window.ReactNativeWebView) {
+    try {
+      window.ReactNativeWebView.postMessage(msg);
+      return;
+    } catch (e) {}
+  }
+  try {
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage(msg, '*');
+      return;
+    }
+  } catch (e) {}
   document.getElementById('mainScreen').classList.remove('active');
   document.getElementById('introScreen').classList.add('active');
 }
